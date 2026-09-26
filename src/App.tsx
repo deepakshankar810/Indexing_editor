@@ -26,6 +26,7 @@ const INITIAL_BULK_STATE: BulkEditState = {
   organismListText: '',
   organismTypes: [],
   diseaseKeywords: [],
+  includeDiseaseActivity: true,
   techKeywords: [],
   ssKeywords: [],
   geneKeywords: [],

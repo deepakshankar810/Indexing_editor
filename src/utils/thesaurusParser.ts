@@ -136,7 +136,8 @@ export function resolveKeywords(
   keywords: string[],
   targetColumn: 'Disease' | 'Tech' | 'SS',
   termMap: Map<string, TermEntry>,
-  keepOriginalSS: boolean = false
+  keepOriginalSS: boolean = false,
+  includeDiseaseActivity: boolean = true
 ): string[] {
   if (!keywords || keywords.length === 0) return [];
 
@@ -160,9 +161,18 @@ export function resolveKeywords(
     // If term is not in termMap at all -> custom term, must have '@'
     if (!termMap.has(kwLower)) {
       if (!isForcedCustom) {
-        resolved.push('@' + kwClean);
+        // If it's custom and user has includeDiseaseActivity false, strip any explicit activity if present
+        let finalKw = kwClean;
+        if (targetColumn === 'Disease' && !includeDiseaseActivity && finalKw.includes('/')) {
+          finalKw = finalKw.split('/')[0].trim();
+        }
+        resolved.push('@' + finalKw);
       } else {
-        resolved.push(kwClean);
+        let finalKw = kwClean;
+        if (targetColumn === 'Disease' && !includeDiseaseActivity && finalKw.includes('/')) {
+          finalKw = finalKw.split('/')[0].trim();
+        }
+        resolved.push(finalKw);
       }
       continue;
     }
@@ -187,7 +197,8 @@ export function resolveKeywords(
 
     if (targetColumn === 'Disease') {
       const cleanAct = act.replace(/^\/+/, '').trim();
-      const actStr = cleanAct ? ` /${cleanAct}` : '';
+      // Only append /activity if includeDiseaseActivity is true and an activity exists
+      const actStr = includeDiseaseActivity && cleanAct ? ` /${cleanAct}` : '';
       resolved.push(`${primaryTerm}${actStr}`);
     } else {
       resolved.push(primaryTerm);

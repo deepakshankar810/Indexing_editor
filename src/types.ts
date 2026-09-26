@@ -63,6 +63,7 @@ export interface BulkEditState {
   organismListText: string;
   organismTypes: string[];
   diseaseKeywords: string[];
+  includeDiseaseActivity: boolean;
   techKeywords: string[];
   ssKeywords: string[];
   geneKeywords: string[];

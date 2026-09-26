@@ -118,7 +118,13 @@ export function applyBulkEditsToRows(
   const targetIds = parseSequenceIds(state.targetRange, currentRows.length);
 
   // Parse keywords with strict column checking
-  const disResolved = resolveKeywords(state.diseaseKeywords, 'Disease', termMap);
+  const disResolved = resolveKeywords(
+    state.diseaseKeywords,
+    'Disease',
+    termMap,
+    false,
+    state.includeDiseaseActivity ?? true
+  );
   const techResolved = resolveKeywords(state.techKeywords, 'Tech', termMap);
   const combinedSS = [
     ...state.ssKeywords,

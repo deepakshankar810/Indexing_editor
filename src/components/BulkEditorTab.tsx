@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   RotateCcw,
   Check,
@@ -10,6 +10,10 @@ import {
   FileText,
   Tag,
   Dna,
+  Search,
+  Activity,
+  Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 import { BulkEditState, TermEntry } from '../types';
 import { parseSequenceIds } from '../utils/sequenceProcessor';
@@ -42,8 +46,89 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   onClearEditor,
   onGoToGrid,
 }) => {
-  const [customDisease, setCustomDisease] = useState('');
-  const [customTech, setCustomTech] = useState('');
+  const [diseaseSearch, setDiseaseSearch] = useState('');
+  const [isDiseaseOpen, setIsDiseaseOpen] = useState(false);
+  const diseaseContainerRef = useRef<HTMLDivElement>(null);
+
+  const [techSearch, setTechSearch] = useState('');
+  const [isTechOpen, setIsTechOpen] = useState(false);
+  const techContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (diseaseContainerRef.current && !diseaseContainerRef.current.contains(event.target as Node)) {
+        setIsDiseaseOpen(false);
+      }
+      if (techContainerRef.current && !techContainerRef.current.contains(event.target as Node)) {
+        setIsTechOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filtered Disease Suggestions
+  const filteredDiseaseSuggestions = useMemo(() => {
+    const query = diseaseSearch.trim().toLowerCase();
+    if (!query) {
+      // Top 15 default disease terms
+      return dropdownChoices.Disease.slice(0, 15).map((item) => {
+        const lower = item.split('/')[0].trim().toLowerCase();
+        const entry = termMap.get(lower);
+        return {
+          original: entry?.original || item.split('/')[0].trim(),
+          activity: entry?.activity || (item.includes('/') ? item.split('/')[1].trim() : ''),
+        };
+      });
+    }
+
+    const matches: { original: string; activity: string }[] = [];
+    const seen = new Set<string>();
+
+    for (const [key, entry] of termMap.entries()) {
+      if (entry.categories.has('Disease')) {
+        const matchTerm = entry.original.toLowerCase().includes(query);
+        const matchPref = entry.preferred && entry.preferred.toLowerCase().includes(query);
+        const matchAct = entry.activity && entry.activity.toLowerCase().includes(query);
+
+        if (matchTerm || matchPref || matchAct) {
+          const displayTerm = entry.preferred || entry.original;
+          if (!seen.has(displayTerm.toLowerCase())) {
+            seen.add(displayTerm.toLowerCase());
+            matches.push({
+              original: displayTerm,
+              activity: entry.activity || '',
+            });
+          }
+        }
+      }
+    }
+
+    // Also check dropdownChoices
+    for (const item of dropdownChoices.Disease) {
+      if (item.toLowerCase().includes(query)) {
+        const baseName = item.split('/')[0].trim();
+        if (!seen.has(baseName.toLowerCase())) {
+          seen.add(baseName.toLowerCase());
+          const entry = termMap.get(baseName.toLowerCase());
+          matches.push({
+            original: baseName,
+            activity: entry?.activity || (item.includes('/') ? item.split('/')[1].trim() : ''),
+          });
+        }
+      }
+    }
+
+    return matches.slice(0, 25);
+  }, [diseaseSearch, dropdownChoices.Disease, termMap]);
+
+  // Filtered Tech Suggestions
+  const filteredTechSuggestions = useMemo(() => {
+    const query = techSearch.trim().toLowerCase();
+    if (!query) return dropdownChoices.Tech.slice(0, 15);
+    return dropdownChoices.Tech.filter((t) => t.toLowerCase().includes(query)).slice(0, 25);
+  }, [techSearch, dropdownChoices.Tech]);
 
   // Target count calculation
   const targetIds = useMemo(() => {
@@ -127,59 +212,78 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   return (
     <div className="max-w-[1240px] mx-auto space-y-5">
       {/* Target Range Selection Toolbar */}
-      <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300">
-            <Sliders className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
-            <span>Target Sequence Range:</span>
-          </div>
+      <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          {/* Left: Input, presets, and affected count */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shrink-0">
+              <div className="p-1.5 bg-blue-50 dark:bg-blue-950/60 rounded-md text-blue-600 dark:text-cyan-400">
+                <Sliders className="w-3.5 h-3.5" />
+              </div>
+              <span>Target Range:</span>
+            </div>
 
-          <div className="flex items-center gap-2 flex-1 max-w-sm">
-            <input
-              type="text"
-              value={bulkState.targetRange}
-              onChange={(e) => setBulkState((prev) => ({ ...prev, targetRange: e.target.value }))}
-              placeholder="all or 1-5, 10"
-              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500"
-            />
-            <div className="flex items-center gap-1">
-              {['all', '1-5', '6-10'].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setBulkState((prev) => ({ ...prev, targetRange: preset }))}
-                  className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded border border-slate-200 dark:border-slate-800 font-mono transition-colors"
-                >
-                  {preset}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={bulkState.targetRange}
+                onChange={(e) => setBulkState((prev) => ({ ...prev, targetRange: e.target.value }))}
+                placeholder="all or 1-5, 10"
+                className="w-32 sm:w-36 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+              />
+
+              {/* Preset Range Chips with whitespace-nowrap and active styling */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {['all', '1-5', '6-10'].map((preset) => {
+                  const isActive = bulkState.targetRange.trim().toLowerCase() === preset.toLowerCase();
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setBulkState((prev) => ({ ...prev, targetRange: preset }))}
+                      className={`px-2.5 py-1 text-[11px] font-mono rounded-md border whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold dark:bg-blue-950/70 dark:text-cyan-300 dark:border-blue-700'
+                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Scope Badge */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 shrink-0">
+              <span className={`w-1.5 h-1.5 rounded-full ${targetCount > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              <span>
+                Affects <strong className="font-mono text-slate-900 dark:text-white font-semibold">{targetCount}</strong> of{' '}
+                <span className="font-mono text-slate-700 dark:text-slate-300">{totalSequences}</span> sequences
+              </span>
             </div>
           </div>
 
-          <div className="text-xs text-slate-500 dark:text-slate-400">
-            Affects <span className="font-mono tabular-nums text-slate-900 dark:text-white font-semibold">{targetCount}</span> of{' '}
-            <span className="font-mono tabular-nums text-slate-900 dark:text-white font-semibold">{totalSequences}</span> sequences
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
+            <button
+              type="button"
+              onClick={onClearEditor}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Clear Form</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onApplyEdits}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Apply to Sequences</span>
+            </button>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={onClearEditor}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-transparent dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Clear Form</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onApplyEdits}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium shadow-sm transition-colors"
-          >
-            <Check className="w-3.5 h-3.5" />
-            <span>Apply to Sequences</span>
-          </button>
         </div>
       </div>
 
@@ -494,140 +598,395 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Disease Keywords */}
-            <div className="space-y-1.5">
-              <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                Disease / Activity Keywords
-              </label>
-              <div className="flex gap-2">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) handleAddKeyword(e.target.value, 'diseaseKeywords');
-                  }}
-                  className="flex-1 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select from Thesaurus...</option>
-                  {dropdownChoices.Disease.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
+            <div className="space-y-2" ref={diseaseContainerRef}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    Disease Keywords
+                  </label>
+                </div>
 
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={customDisease}
-                    onChange={(e) => setCustomDisease(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddKeyword(customDisease, 'diseaseKeywords');
-                        setCustomDisease('');
-                      }
-                    }}
-                    placeholder="custom term..."
-                    className="w-32 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
-                  />
+                {/* Activity ON / OFF Toggle & Checkbox */}
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      handleAddKeyword(customDisease, 'diseaseKeywords');
-                      setCustomDisease('');
-                    }}
-                    className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md transition-colors"
+                    onClick={() =>
+                      setBulkState((prev) => ({
+                        ...prev,
+                        includeDiseaseActivity: !prev.includeDiseaseActivity,
+                      }))
+                    }
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                      bulkState.includeDiseaseActivity
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700 shadow-xs'
+                        : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'
+                    }`}
+                    title="Click to toggle whether therapeutic activity terms (/cytostatic, /antidiabetic, etc.) are included with disease keywords"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        bulkState.includeDiseaseActivity
+                          ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]'
+                          : 'bg-slate-400'
+                      }`}
+                    />
+                    <span>Activity: {bulkState.includeDiseaseActivity ? 'ON (/act included)' : 'OFF (disease only)'}</span>
                   </button>
+
+                  <label className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={bulkState.includeDiseaseActivity}
+                      onChange={(e) =>
+                        setBulkState((prev) => ({
+                          ...prev,
+                          includeDiseaseActivity: e.target.checked,
+                        }))
+                      }
+                      className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-0 cursor-pointer"
+                    />
+                    <span>Include /activity</span>
+                  </label>
                 </div>
               </div>
 
-              {/* Disease Tags */}
-              <div className="flex flex-wrap gap-1.5 min-h-[22px]">
-                {bulkState.diseaseKeywords.map((kw) => (
-                  <span
-                    key={kw}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-mono"
-                  >
-                    <span>{kw}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveKeyword(kw, 'diseaseKeywords')}
-                      className="text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-200"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                {bulkState.includeDiseaseActivity ? (
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    ✓ <strong>Activity Enabled:</strong> Diseases will automatically attach their registered activity (e.g.{' '}
+                    <em>cancer /cytostatic</em>, <em>diabetes /antidiabetic</em>, <em>pain /analgesic</em>).
                   </span>
-                ))}
+                ) : (
+                  <span className="text-slate-500 dark:text-slate-400">
+                    ○ <strong>Disease Only Mode:</strong> Terms will be saved without therapeutic activity (e.g.{' '}
+                    <em>cancer</em>, <em>diabetes</em>, <em>pain</em>).
+                  </span>
+                )}
+              </div>
+
+              {/* Searchable Disease Input Combobox */}
+              <div className="relative">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                      <Search className="w-3.5 h-3.5" />
+                    </div>
+                    <input
+                      type="text"
+                      value={diseaseSearch}
+                      onChange={(e) => {
+                        setDiseaseSearch(e.target.value);
+                        setIsDiseaseOpen(true);
+                      }}
+                      onFocus={() => setIsDiseaseOpen(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (diseaseSearch.trim()) {
+                            if (filteredDiseaseSuggestions.length > 0 && filteredDiseaseSuggestions[0].original.toLowerCase() === diseaseSearch.trim().toLowerCase()) {
+                              const item = filteredDiseaseSuggestions[0];
+                              const toAdd = bulkState.includeDiseaseActivity && item.activity
+                                ? `${item.original} /${item.activity}`
+                                : item.original;
+                              handleAddKeyword(toAdd, 'diseaseKeywords');
+                            } else {
+                              handleAddKeyword(diseaseSearch.trim(), 'diseaseKeywords');
+                            }
+                            setDiseaseSearch('');
+                            setIsDiseaseOpen(false);
+                          }
+                        } else if (e.key === 'Escape') {
+                          setIsDiseaseOpen(false);
+                        }
+                      }}
+                      placeholder="Type to search disease terms or enter custom..."
+                      className="w-full pl-8 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                    />
+                    {diseaseSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setDiseaseSearch('')}
+                        className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Standard select as alternative browse */}
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const base = e.target.value.split('/')[0].trim();
+                        const entry = termMap.get(base.toLowerCase());
+                        const act = entry?.activity || (e.target.value.includes('/') ? e.target.value.split('/')[1].trim() : '');
+                        const toAdd = bulkState.includeDiseaseActivity && act
+                          ? `${base} /${act}`
+                          : base;
+                        handleAddKeyword(toAdd, 'diseaseKeywords');
+                      }
+                    }}
+                    className="w-36 px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    <option value="">Browse List...</option>
+                    {dropdownChoices.Disease.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Suggestions Dropdown Popover */}
+                {isDiseaseOpen && (
+                  <div className="absolute z-30 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+                      <span>Matching Controlled Disease Terms ({filteredDiseaseSuggestions.length})</span>
+                      <span className="font-mono text-[9px] lowercase">press Enter or click to add</span>
+                    </div>
+
+                    {filteredDiseaseSuggestions.map((item) => {
+                      const displayTerm = item.original;
+                      const hasAct = !!item.activity;
+                      const willOutput = bulkState.includeDiseaseActivity && hasAct
+                        ? `${displayTerm} /${item.activity}`
+                        : displayTerm;
+
+                      return (
+                        <button
+                          key={displayTerm}
+                          type="button"
+                          onClick={() => {
+                            handleAddKeyword(willOutput, 'diseaseKeywords');
+                            setDiseaseSearch('');
+                            setIsDiseaseOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                              {displayTerm}
+                            </span>
+                            {hasAct && (
+                              <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                                  bulkState.includeDiseaseActivity
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 font-semibold border border-emerald-200 dark:border-emerald-800/80'
+                                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 line-through opacity-70'
+                                }`}
+                                title={
+                                  bulkState.includeDiseaseActivity
+                                    ? `Activity attached: /${item.activity}`
+                                    : `Activity omitted because Activity toggle is OFF`
+                                }
+                              >
+                                /{item.activity}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                            <span className="font-mono">Add &rarr; {willOutput}</span>
+                            <Plus className="w-3 h-3" />
+                          </div>
+                        </button>
+                      );
+                    })}
+
+                    {/* Custom Term Fallback Option */}
+                    {diseaseSearch.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleAddKeyword(diseaseSearch.trim(), 'diseaseKeywords');
+                          setDiseaseSearch('');
+                          setIsDiseaseOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          <span>
+                            Add Custom Term: <strong className="font-mono">@{diseaseSearch.trim().replace(/^@+/, '')}</strong>
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">Custom Tag</span>
+                      </button>
+                    )}
+
+                    {filteredDiseaseSuggestions.length === 0 && !diseaseSearch.trim() && (
+                      <div className="px-3 py-3 text-center text-slate-400 text-xs">
+                        Type keywords to search Clarivate thesaurus...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Disease Tags */}
+              <div className="flex flex-wrap gap-1.5 min-h-[22px] pt-0.5">
+                {bulkState.diseaseKeywords.length === 0 ? (
+                  <span className="text-[11px] text-slate-400 italic">No disease keywords selected.</span>
+                ) : (
+                  bulkState.diseaseKeywords.map((kw) => (
+                    <span
+                      key={kw}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-mono shadow-2xs"
+                    >
+                      <span>{kw}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveKeyword(kw, 'diseaseKeywords')}
+                        className="text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-200 cursor-pointer ml-0.5"
+                        title="Remove keyword"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))
+                )}
               </div>
             </div>
 
             {/* Tech Focus Keywords */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800/60">
-              <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                Technology Focus Keywords
-              </label>
-              <div className="flex gap-2">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) handleAddKeyword(e.target.value, 'techKeywords');
-                  }}
-                  className="flex-1 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select from Thesaurus...</option>
-                  {dropdownChoices.Tech.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
+            <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800/60" ref={techContainerRef}>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  Technology Focus Keywords
+                </label>
+                <span className="text-[10px] text-slate-400 font-mono">Col 9</span>
+              </div>
 
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={customTech}
-                    onChange={(e) => setCustomTech(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddKeyword(customTech, 'techKeywords');
-                        setCustomTech('');
-                      }
+              {/* Searchable Tech Input Combobox */}
+              <div className="relative">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                      <Search className="w-3.5 h-3.5" />
+                    </div>
+                    <input
+                      type="text"
+                      value={techSearch}
+                      onChange={(e) => {
+                        setTechSearch(e.target.value);
+                        setIsTechOpen(true);
+                      }}
+                      onFocus={() => setIsTechOpen(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (techSearch.trim()) {
+                            handleAddKeyword(techSearch.trim(), 'techKeywords');
+                            setTechSearch('');
+                            setIsTechOpen(false);
+                          }
+                        } else if (e.key === 'Escape') {
+                          setIsTechOpen(false);
+                        }
+                      }}
+                      placeholder="Type to search tech keywords or enter custom..."
+                      className="w-full pl-8 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                    />
+                    {techSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setTechSearch('')}
+                        className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) handleAddKeyword(e.target.value, 'techKeywords');
                     }}
-                    placeholder="custom term..."
-                    className="w-32 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleAddKeyword(customTech, 'techKeywords');
-                      setCustomTech('');
-                    }}
-                    className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md transition-colors"
+                    className="w-36 px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+                    <option value="">Browse List...</option>
+                    {dropdownChoices.Tech.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                {/* Suggestions Dropdown Popover */}
+                {isTechOpen && (
+                  <div className="absolute z-30 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+                      <span>Matching Tech Focus Terms ({filteredTechSuggestions.length})</span>
+                      <span className="font-mono text-[9px] lowercase">press Enter or click</span>
+                    </div>
+
+                    {filteredTechSuggestions.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => {
+                          handleAddKeyword(item, 'techKeywords');
+                          setTechSearch('');
+                          setIsTechOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                      >
+                        <span className="font-medium text-slate-900 dark:text-slate-100">{item}</span>
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                          <span>Add</span>
+                          <Plus className="w-3 h-3" />
+                        </div>
+                      </button>
+                    ))}
+
+                    {techSearch.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleAddKeyword(techSearch.trim(), 'techKeywords');
+                          setTechSearch('');
+                          setIsTechOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          <span>
+                            Add Custom Term: <strong className="font-mono">@{techSearch.trim().replace(/^@+/, '')}</strong>
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">Custom Tag</span>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Tech Tags */}
-              <div className="flex flex-wrap gap-1.5 min-h-[22px]">
-                {bulkState.techKeywords.map((kw) => (
-                  <span
-                    key={kw}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-200 dark:border-cyan-800/80 text-cyan-800 dark:text-cyan-300 text-xs font-mono"
-                  >
-                    <span>{kw}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveKeyword(kw, 'techKeywords')}
-                      className="text-cyan-500 hover:text-cyan-700 dark:hover:text-cyan-200"
+              <div className="flex flex-wrap gap-1.5 min-h-[22px] pt-0.5">
+                {bulkState.techKeywords.length === 0 ? (
+                  <span className="text-[11px] text-slate-400 italic">No tech focus keywords selected.</span>
+                ) : (
+                  bulkState.techKeywords.map((kw) => (
+                    <span
+                      key={kw}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-200 dark:border-cyan-800/80 text-cyan-800 dark:text-cyan-300 text-xs font-mono shadow-2xs"
                     >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
+                      <span>{kw}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveKeyword(kw, 'techKeywords')}
+                        className="text-cyan-500 hover:text-cyan-700 dark:hover:text-cyan-200 cursor-pointer ml-0.5"
+                        title="Remove keyword"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))
+                )}
               </div>
             </div>
 

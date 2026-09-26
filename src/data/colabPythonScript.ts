@@ -1,16 +1,26 @@
 export const COLAB_PYTHON_SCRIPT = `"""
 Clarivate Geneseq Auto-Indexer Workspace (Google Colab Edition)
-Optimized for Zero-Lag, Real-Time 72-Character DE Validation, and High-Density UI
 ================================================================================
-Requirements:
-    pip install gradio pandas openpyxl
+Optimized for Zero-Lag, Real-Time 72-Character DE Validation, and High-Density UI.
+
+Installation in Google Colab (Run in a code cell):
+!pip install gradio pandas openpyxl
 """
+
+import sys
+import subprocess
+
+# Auto-install openpyxl if missing in Colab environment
+try:
+    import openpyxl
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "openpyxl", "-q"])
 
 import gradio as gr
 import pandas as pd
 import tempfile
 import re
-import json
+import os
 
 # ==============================================================================
 # 1. CLARIVATE EXACT 20-COLUMN STANDARD SPECIFICATION
@@ -158,11 +168,12 @@ def process_thesaurus(file_obj, current_map):
                     else:
                         term_map[pref_lower]['categories'].add(cat)
                 
-                # Sample top 500 for instant lag-free dropdown rendering in Colab
+                # Sample up to 500 options for instant dropdown rendering without browser freeze
                 if len(dropdown_sets[cat]) < 500:
                     dropdown_sets[cat].add(orig_term)
 
-    summary_msg = f"✓ Synced {len(term_map):,} controlled terms from '{file_obj.name.split('/')[-1]}'"
+    filename = os.path.basename(file_obj.name)
+    summary_msg = f"✓ Synced {len(term_map):,} controlled terms from '{filename}'"
 
     return (
         gr.update(choices=sorted(list(dropdown_sets["Disease"]))),
@@ -179,7 +190,7 @@ def process_thesaurus(file_obj, current_map):
 # ==============================================================================
 # 4. RESOLVER & BULK EDIT LOGIC
 # ==============================================================================
-def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False):
+def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False, include_disease_activity=True):
     if not kw_list: 
         return []
     
@@ -197,6 +208,8 @@ def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False):
         kw_lower = kw_clean.lstrip('@').split('/')[0].strip().lower()
         
         if kw_lower not in term_map:
+            if target_column == "Disease" and not include_disease_activity and '/' in kw_clean:
+                kw_clean = kw_clean.split('/')[0].strip()
             resolved_list.append(kw_clean if is_forced_custom else '@' + kw_clean)
             continue
             
@@ -215,8 +228,11 @@ def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False):
             orig = '@' + orig.lstrip('@')
         
         if target_column == "Disease":
-            act_str = f" /{act.lstrip('/')}" if act else ""
-            resolved_list.append(f"{primary_term}{act_str}")
+            if include_disease_activity and act:
+                act_str = f" /{act.lstrip('/')}"
+                resolved_list.append(f"{primary_term}{act_str}")
+            else:
+                resolved_list.append(primary_term)
         else:
             resolved_list.append(primary_term)
             if target_column == "SS" and pref and keep_original_ss and orig != primary_term:
@@ -254,12 +270,29 @@ def create_initial_grid(num_seqs):
         row["Sequence Location"] = f"SeqID {i}"
         data.append(row)
     df = pd.DataFrame(data)
-    return df, f"Master Grid initialized with {num_seqs} sequence rows."
+    return df, f"✓ Master Grid initialized with {num_seqs} sequence rows."
+
+
+def import_existing_csv(file_obj):
+    if file_obj is None:
+        return None, 10, "No CSV file uploaded."
+    try:
+        df = pd.read_csv(file_obj.name)
+        # Ensure all standard 20 Clarivate columns exist
+        for col in COLUMNS:
+            if col not in df.columns:
+                df[col] = ""
+        df = df[COLUMNS]
+        count = len(df)
+        filename = os.path.basename(file_obj.name)
+        return df, count, f"✓ Successfully imported {count} sequence rows from '{filename}'."
+    except Exception as e:
+        return None, 10, f"Error importing CSV: {e}"
 
 
 def apply_bulk_edits(df, target_seqs_str, seq_type, mol_type, 
                      ref_loc_type, ref_loc_num, phys_loc_type, phys_loc_val, 
-                     org_list_text, org_type_list, disease_kws, tech_kws, ss_kws, gene_kws, 
+                     org_list_text, org_type_list, disease_kws, include_disease_activity, tech_kws, ss_kws, gene_kws, 
                      protein_kws, uncat_kws, de_base, comments_base, keep_original_ss, term_map):
     if df is None or df.empty:
         return df, "Error: Master grid is empty. Initialize sequences first."
@@ -281,7 +314,7 @@ def apply_bulk_edits(df, target_seqs_str, seq_type, mol_type,
                 
     org_combined = ";".join(org_parts)
 
-    dis_resolved = resolve_keywords(disease_kws, "Disease", term_map)
+    dis_resolved = resolve_keywords(disease_kws, "Disease", term_map, include_disease_activity=include_disease_activity)
     tech_resolved = resolve_keywords(tech_kws, "Tech", term_map)
     combined_ss = (ss_kws or []) + (gene_kws or []) + (protein_kws or []) + (uncat_kws or [])
     ss_resolved = resolve_keywords(combined_ss, "SS", term_map, keep_original_ss)
@@ -353,8 +386,16 @@ def apply_bulk_edits(df, target_seqs_str, seq_type, mol_type,
         if comments_base: 
             df.at[index, 'Comments'] = comments_base.replace('{x}', str(seq_num)).replace('{id}', str(seq_num))
 
-    msg = f"✓ Applied bulk indexing rules to {updated_count} sequences."
+    msg = f"✓ Successfully indexed {updated_count} sequences with Clarivate rules."
     return df, msg
+
+
+def filter_grid(df, query):
+    if df is None or df.empty or not query or not query.strip():
+        return df
+    q = query.strip().lower()
+    mask = df.astype(str).apply(lambda row: row.str.lower().str.contains(q, regex=False).any(), axis=1)
+    return df[mask]
 
 
 def export_to_csv(df):
@@ -363,14 +404,21 @@ def export_to_csv(df):
     temp_dir = tempfile.mkdtemp()
     output_path = f"{temp_dir}/Geneseq_Final_Import.csv"
     df.to_csv(output_path, index=False)
+    
+    # Trigger Colab browser download if running inside Colab
+    try:
+        from google.colab import files as colab_files
+        colab_files.download(output_path)
+    except Exception:
+        pass
+        
     return output_path
 
 
 # ==============================================================================
-# 5. HIGH-FIDELITY CUSTOM CSS (IDENTICAL TO REACT APPLET THEME)
+# 5. HIGH-FIDELITY CUSTOM CSS (REACT APPLET PARITY)
 # ==============================================================================
 CUSTOM_CSS = """
-/* Import Inter Font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 body, .gradio-container {
@@ -379,7 +427,6 @@ body, .gradio-container {
     color: #e2e8f0 !important;
 }
 
-/* Header Banner */
 .app-header {
     background: linear-gradient(180deg, #111827 0%, #0e1422 100%);
     border: 1px solid #1e293b;
@@ -391,7 +438,6 @@ body, .gradio-container {
     justify-content: space-between;
 }
 
-/* Tabs styling matching our web app */
 .tabs {
     border-bottom: 1px solid #1e293b !important;
     background: transparent !important;
@@ -412,7 +458,6 @@ button.tab-nav.selected {
     box-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
 }
 
-/* Card panels */
 .card-panel {
     background-color: #0e1422 !important;
     border: 1px solid #1e293b !important;
@@ -420,7 +465,6 @@ button.tab-nav.selected {
     padding: 18px !important;
 }
 
-/* Input Fields */
 input, textarea, select {
     background-color: #090d16 !important;
     border: 1px solid #334155 !important;
@@ -435,20 +479,6 @@ input:focus, textarea:focus, select:focus {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
 }
 
-/* Primary and Secondary Buttons */
-.btn-primary {
-    background-color: #2563eb !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
-    border-radius: 8px !important;
-    border: none !important;
-}
-
-.btn-primary:hover {
-    background-color: #1d4ed8 !important;
-}
-
-/* 72-Char Client-Side Live Indicator */
 #live-de-gauge {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -472,9 +502,9 @@ input:focus, textarea:focus, select:focus {
 }
 """
 
-# Client-Side Zero-Latency JavaScript for 72-character tracking
+# Client-Side Zero-Latency JavaScript for 72-character tracking (Immediately Invoked)
 CLIENT_JS = """
-function setupClientSideCharCounter() {
+(() => {
     function attachCounter() {
         const deTextarea = document.querySelector("#de-input textarea") || document.querySelector("#de-input input");
         const gaugeEl = document.querySelector("#live-de-gauge");
@@ -486,11 +516,11 @@ function setupClientSideCharCounter() {
                 const len = deTextarea.value.length;
                 if (len <= 72) {
                     gaugeEl.className = "gauge-ok";
-                    gaugeEl.innerHTML = "<span>Valid DE Line length: </span><span>" + len + " / 72 chars (" + (72 - len) + " left)</span>";
+                    gaugeEl.innerHTML = "<span>✓ Valid DE Line length: </span><span>" + len + " / 72 chars (" + (72 - len) + " left)</span>";
                 } else {
                     const over = len - 72;
                     gaugeEl.className = "gauge-over";
-                    gaugeEl.innerHTML = "<span>EXCEEDS CLARIVATE LIMIT: </span><span>" + len + " / 72 chars (+" + over + " over!)</span>";
+                    gaugeEl.innerHTML = "<span>⚠️ EXCEEDS CLARIVATE LIMIT: </span><span>" + len + " / 72 chars (+" + over + " over!)</span>";
                 }
             }
             
@@ -498,13 +528,12 @@ function setupClientSideCharCounter() {
             updateGauge();
         }
     }
-    setInterval(attachCounter, 600);
-}
+    setInterval(attachCounter, 400);
+})()
 """
 
-
 # ==============================================================================
-# 6. GRADIO INTERFACE LAYOUT (PERFECT UI PARITY & ZERO-LAG)
+# 6. GRADIO INTERFACE LAYOUT (MATCHING WEB APP)
 # ==============================================================================
 with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT_JS) as app:
     
@@ -522,13 +551,13 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 11px; font-family: monospace; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 8px; border-radius: 6px;">
-                ● 100% Client-Side Fast Mode
+                ● Fast Mode (0ms Typing Latency)
             </span>
         </div>
     </div>
     """)
     
-    # State Stores (No continuous websocket serialization)
+    # State Stores
     grid_state = gr.State(pd.DataFrame(columns=COLUMNS))
     term_map_state = gr.State(INITIAL_TERM_MAP)
 
@@ -539,28 +568,31 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
         # ----------------------------------------------------------------------
         with gr.Tab("1. Setup & Thesaurus"):
             with gr.Row():
+                # Panel 1: Thesaurus Dictionary
                 with gr.Column(scale=1):
                     gr.Markdown("### Controlled Thesaurus Matrix")
-                    gr.Markdown("Upload an official Clarivate thesaurus workbook ('.xlsx' or '.xlsm') to synchronize sheets. Terms without registration are automatically tagged with '@'.")
+                    gr.Markdown("Upload an official Clarivate thesaurus workbook ('.xlsx' or '.xlsm') to synchronize sheets for Disease, Technology Focus, and Sequence Specific terms. Terms without registration are automatically tagged with '@'.")
                     thesaurus_file = gr.File(label="Upload Thesaurus Workbook (.xlsx / .xlsm)", file_types=[".xlsx", ".xls", ".xlsm"])
                     thesaurus_status = gr.Markdown("*Clarivate Core Seed Dictionary Active (95 terms)*")
                 
+                # Panel 2: Initialize Grid or Import CSV
                 with gr.Column(scale=1):
                     gr.Markdown("### Initialize Master Sequence Grid")
-                    gr.Markdown("Specify the number of patent sequences (DNA, RNA, or Protein) to generate the standardized blank 20-column template.")
+                    gr.Markdown("Specify the sequence count to generate blank 20-column template, or import an existing Clarivate CSV export file.")
                     
                     with gr.Row():
                         num_seqs_input = gr.Number(label="Sequence Count", value=10, precision=0)
                         init_btn = gr.Button("Generate Grid", variant="primary")
                     
-                    # Quick size preset buttons
                     with gr.Row():
                         preset_10 = gr.Button("10", size="sm")
                         preset_25 = gr.Button("25", size="sm")
                         preset_50 = gr.Button("50", size="sm")
                         preset_100 = gr.Button("100", size="sm")
                         preset_250 = gr.Button("250", size="sm")
-                        
+
+                    gr.HTML('<div style="border-top: 1px solid #1e293b; margin: 12px 0 8px 0; padding-top: 8px;"><span style="font-size: 12px; font-weight: 600; color: #94a3b8;">Or Import Existing Clarivate CSV:</span></div>')
+                    csv_import_file = gr.File(label="Upload Clarivate Sequence CSV (.csv)", file_types=[".csv"])
                     init_status = gr.Markdown("")
 
         # ----------------------------------------------------------------------
@@ -608,10 +640,12 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
             """)
             
             with gr.Row():
-                disease_dd = gr.Dropdown(choices=[v['original'] for k,v in INITIAL_TERM_MAP.items() if "Disease" in v['categories']], multiselect=True, allow_custom_value=True, label="Disease / Activity Keywords (/activity auto-attached)")
+                disease_dd = gr.Dropdown(choices=[v['original'] for k,v in INITIAL_TERM_MAP.items() if "Disease" in v['categories']], multiselect=True, allow_custom_value=True, label="Disease Keywords", scale=3)
+                include_disease_act_cb = gr.Checkbox(value=True, label="Include /activity qualifier (e.g. cancer /cytostatic)", scale=2)
+
+            with gr.Row():
                 tech_dd = gr.Dropdown(choices=[v['original'] for k,v in INITIAL_TERM_MAP.items() if "Tech" in v['categories']], multiselect=True, allow_custom_value=True, label="Technology Focus Keywords")
-            
-            keep_original_ss = gr.Checkbox(value=True, label="Preserve original gene/protein symbol alongside canonical preferred term")
+                keep_original_ss = gr.Checkbox(value=True, label="Preserve original gene/protein symbol alongside canonical preferred term")
             
             with gr.Row():
                 ss_dd = gr.Dropdown(choices=[v['original'] for k,v in INITIAL_TERM_MAP.items() if "SS" in v['categories']], multiselect=True, allow_custom_value=True, label="Sequence Specific")
@@ -631,7 +665,7 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
                 label="DE Line Base Template (Use '{x}' for sequential ID)", 
                 placeholder="e.g. Homo sapiens FASL gene, SEQ ID NO: {x}"
             )
-            # The client-side gauge updates instantaneously without network lag
+            # Live gauge updating via client-side DOM observer without network roundtrips
             gr.HTML('<div id="live-de-gauge" class="gauge-ok"><span>✓ Valid DE Line length</span><span>0 / 72 chars (72 left)</span></div>')
 
             comments_txt = gr.TextArea(
@@ -650,13 +684,11 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
         # TAB 3: MASTER SEQUENCE GRID & EXPORT
         # ----------------------------------------------------------------------
         with gr.Tab("3. Master Sequence Grid"):
-            gr.HTML("""
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 12px; color: #94a3b8;">Standardized 20-Column Clarivate Format &bull; Horizontal scrolling enabled &bull; Lag-Free Local Mode</span>
-            </div>
-            """)
-            
-            # LAG FIX: No interactive sync loops attached to table change event
+            with gr.Row():
+                grid_search = gr.Textbox(label="Filter Rows by Text / SEQ ID", placeholder="Type to search rows...", scale=3)
+                refresh_grid_btn = gr.Button("Search / Reset Filter", scale=1)
+
+            # Master table without auto-sync lag
             master_grid = gr.Dataframe(
                 headers=COLUMNS, 
                 interactive=True, 
@@ -665,13 +697,13 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
             )
             
             with gr.Row():
-                export_btn = gr.Button("💾 Export to Clarivate CSV", variant="primary")
+                export_btn = gr.Button("💾 Export to Clarivate CSV (Auto-Download)", variant="primary")
                 clear_grid_btn = gr.Button("Clear Master Grid", variant="secondary")
             
-            download_file = gr.File(label="Download Verified CSV File")
+            download_file = gr.File(label="Download Ready CSV File")
 
     # ==============================================================================
-    # 7. EVENT BINDINGS (OPTIMIZED EXECUTION PIPELINE)
+    # 7. EVENT BINDINGS (OPTIMIZED PIPELINE)
     # ==============================================================================
     # Thesaurus Upload
     thesaurus_file.upload(
@@ -688,6 +720,17 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
     ).then(
         fn=lambda df: df, 
         inputs=[grid_state], 
+        outputs=[master_grid]
+    )
+
+    # CSV Importer
+    csv_import_file.upload(
+        fn=import_existing_csv,
+        inputs=[csv_import_file],
+        outputs=[grid_state, num_seqs_input, init_status]
+    ).then(
+        fn=lambda df: df,
+        inputs=[grid_state],
         outputs=[master_grid]
     )
 
@@ -709,7 +752,7 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
         inputs=[
             grid_state, target_range, seq_type_dd, mol_type_dd, 
             ref_loc_type, ref_loc_num, phys_loc_type, phys_loc_val, 
-            org_list_text, org_type_cb, disease_dd, tech_dd, ss_dd, gene_dd, 
+            org_list_text, org_type_cb, disease_dd, include_disease_act_cb, tech_dd, ss_dd, gene_dd, 
             protein_dd, uncat_dd, de_base_txt, comments_txt, keep_original_ss, term_map_state
         ],
         outputs=[grid_state, editor_feedback]
@@ -719,13 +762,20 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
         outputs=[master_grid]
     )
 
+    # Search / Filter
+    refresh_grid_btn.click(
+        fn=filter_grid,
+        inputs=[grid_state, grid_search],
+        outputs=[master_grid]
+    )
+
     # Clear Editor
     clear_editor_btn.click(
-        fn=lambda: ("all", None, None, "Skip", "", "Skip", "", "", [], [], [], True, [], [], [], [], "", ""),
+        fn=lambda: ("all", None, None, "Skip", "", "Skip", "", "", [], True, [], [], True, [], [], [], [], "", ""),
         inputs=[],
         outputs=[
             target_range, seq_type_dd, mol_type_dd, ref_loc_type, ref_loc_num, 
-            phys_loc_type, phys_loc_val, org_list_text, org_type_cb, disease_dd, 
+            phys_loc_type, phys_loc_val, org_list_text, org_type_cb, include_disease_act_cb, disease_dd, 
             tech_dd, keep_original_ss, ss_dd, gene_dd, protein_dd, uncat_dd, 
             de_base_txt, comments_txt
         ]
@@ -745,7 +795,7 @@ with gr.Blocks(title="Clarivate Geneseq Auto-Indexer", css=CUSTOM_CSS, js=CLIENT
         outputs=[download_file]
     )
 
-# Launch in Colab
+# Launch in Google Colab (inline notebook + public link)
 if __name__ == "__main__":
     app.launch(share=True, inline=True)
 `;
