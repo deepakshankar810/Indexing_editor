@@ -36,6 +36,207 @@ interface BulkEditorTabProps {
   onGoToGrid: () => void;
 }
 
+interface KeywordFieldInputProps {
+  label: string;
+  field: 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords';
+  badge: string;
+  choices: string[];
+  selectedKeywords: string[];
+  onAddKeyword: (kw: string, field: 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords') => void;
+  onRemoveKeyword: (kw: string, field: 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords') => void;
+  termMap: Map<string, TermEntry>;
+  placeholder: string;
+  badgeBg: string;
+  tagBg: string;
+  tagBorder: string;
+  tagText: string;
+}
+
+const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
+  label,
+  field,
+  badge,
+  choices,
+  selectedKeywords,
+  onAddKeyword,
+  onRemoveKeyword,
+  termMap,
+  placeholder,
+  badgeBg,
+  tagBg,
+  tagBorder,
+  tagText,
+}) => {
+  const [search, setSearch] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredSuggestions = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return choices.slice(0, 15);
+    return choices.filter((item) => item.toLowerCase().includes(q)).slice(0, 25);
+  }, [search, choices]);
+
+  return (
+    <div className="space-y-1.5" ref={containerRef}>
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+          {label}
+        </label>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono border ${badgeBg}`}>
+          {badge}
+        </span>
+      </div>
+
+      <div className="relative">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+              <Search className="w-3.5 h-3.5" />
+            </div>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setIsOpen(true);
+              }}
+              onFocus={() => setIsOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (search.trim()) {
+                    onAddKeyword(search.trim(), field);
+                    setSearch('');
+                    setIsOpen(false);
+                  }
+                } else if (e.key === 'Escape') {
+                  setIsOpen(false);
+                }
+              }}
+              placeholder={placeholder}
+              className="w-full pl-8 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <select
+            value=""
+            onChange={(e) => {
+              if (e.target.value) onAddKeyword(e.target.value, field);
+            }}
+            className="w-32 sm:w-36 px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0"
+          >
+            <option value="">Browse...</option>
+            {choices.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {isOpen && (
+          <div className="absolute z-30 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+              <span>Matching {badge} Terms ({filteredSuggestions.length})</span>
+              <span className="font-mono text-[9px] lowercase">press Enter or click</span>
+            </div>
+
+            {filteredSuggestions.map((item) => {
+              const entry = termMap.get(item.toLowerCase());
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    onAddKeyword(item, field);
+                    setSearch('');
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{item}</span>
+                    {entry?.preferred && entry.preferred !== item && (
+                      <span className="text-[10px] text-slate-400 font-mono">&rarr; {entry.preferred}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    <span>Add</span>
+                    <Plus className="w-3 h-3" />
+                  </div>
+                </button>
+              );
+            })}
+
+            {search.trim() && (
+              <button
+                type="button"
+                onClick={() => {
+                  onAddKeyword(search.trim(), field);
+                  setSearch('');
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>
+                    Add Custom Term: <strong className="font-mono">@{search.trim().replace(/^@+/, '')}</strong>
+                  </span>
+                </div>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400">Custom Tag</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-1.5 min-h-[20px] pt-0.5">
+        {selectedKeywords.length === 0 ? (
+          <span className="text-[10px] text-slate-400 italic">No {label.toLowerCase()} added.</span>
+        ) : (
+          selectedKeywords.map((kw) => (
+            <span
+              key={kw}
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono border shadow-2xs ${tagBg} ${tagBorder} ${tagText}`}
+            >
+              <span>{kw}</span>
+              <button
+                type="button"
+                onClick={() => onRemoveKeyword(kw, field)}
+                className="hover:opacity-75 cursor-pointer ml-0.5"
+                title="Remove keyword"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   bulkState,
   setBulkState,
@@ -990,108 +1191,93 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
             </div>
 
-            {/* Sequence Specific Keywords */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800/60">
-              <div className="flex items-center justify-between">
-                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400">
-                  Sequence Specific (SS, Gene, Protein, Uncat)
-                </label>
-                <label className="inline-flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer">
+            {/* Sequence Specific Keywords (Separate Search Boxes for Each Field) */}
+            <div className="space-y-3.5 pt-3 border-t border-slate-200 dark:border-slate-800/60">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2">
+                <div className="flex items-center gap-1.5">
+                  <Dna className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+                  <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    Sequence Specific Fields (Col 8)
+                  </label>
+                </div>
+                <label className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={bulkState.keepOriginalSS}
                     onChange={(e) => setBulkState((prev) => ({ ...prev, keepOriginalSS: e.target.checked }))}
-                    className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0"
+                    className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer"
                   />
                   <span>Retain original with Preferred</span>
                 </label>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) handleAddKeyword(e.target.value, 'ssKeywords');
-                  }}
-                  className="px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs"
-                >
-                  <option value="">Sequence Specific...</option>
-                  {dropdownChoices.SS.map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
-                </select>
+              {/* 1. Sequence Specific Keywords Box */}
+              <KeywordFieldInput
+                label="Sequence Specific Keywords"
+                field="ssKeywords"
+                badge="SS"
+                choices={dropdownChoices.SS}
+                selectedKeywords={bulkState.ssKeywords}
+                onAddKeyword={handleAddKeyword}
+                onRemoveKeyword={handleRemoveKeyword}
+                termMap={termMap}
+                placeholder="Type to search SS terms (e.g. PCR, siRNA, ds)..."
+                badgeBg="bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800/80"
+                tagBg="bg-blue-50 dark:bg-blue-950/80"
+                tagBorder="border-blue-200 dark:border-blue-800/80"
+                tagText="text-blue-800 dark:text-blue-300"
+              />
 
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) handleAddKeyword(e.target.value, 'geneKeywords');
-                  }}
-                  className="px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs"
-                >
-                  <option value="">Gene Targets...</option>
-                  {dropdownChoices.Gene.map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
-                </select>
+              {/* 2. Gene Symbols Box */}
+              <KeywordFieldInput
+                label="Gene Symbols"
+                field="geneKeywords"
+                badge="Gene"
+                choices={dropdownChoices.Gene}
+                selectedKeywords={bulkState.geneKeywords}
+                onAddKeyword={handleAddKeyword}
+                onRemoveKeyword={handleRemoveKeyword}
+                termMap={termMap}
+                placeholder="Type to search gene symbols (e.g. BRCA1, EGFR, TP53)..."
+                badgeBg="bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800/80"
+                tagBg="bg-amber-50 dark:bg-amber-950/80"
+                tagBorder="border-amber-200 dark:border-amber-800/80"
+                tagText="text-amber-800 dark:text-amber-300"
+              />
 
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) handleAddKeyword(e.target.value, 'proteinKeywords');
-                  }}
-                  className="px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs"
-                >
-                  <option value="">Protein Targets...</option>
-                  {dropdownChoices.Protein.map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
-                </select>
+              {/* 3. Protein Targets Box */}
+              <KeywordFieldInput
+                label="Protein Targets"
+                field="proteinKeywords"
+                badge="Protein"
+                choices={dropdownChoices.Protein}
+                selectedKeywords={bulkState.proteinKeywords}
+                onAddKeyword={handleAddKeyword}
+                onRemoveKeyword={handleRemoveKeyword}
+                termMap={termMap}
+                placeholder="Type to search protein targets (e.g. insulin, CD4, TNF)..."
+                badgeBg="bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800/80"
+                tagBg="bg-purple-50 dark:bg-purple-950/80"
+                tagBorder="border-purple-200 dark:border-purple-800/80"
+                tagText="text-purple-800 dark:text-purple-300"
+              />
 
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value) handleAddKeyword(e.target.value, 'uncatKeywords');
-                  }}
-                  className="px-2 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs"
-                >
-                  <option value="">Uncategorised...</option>
-                  {dropdownChoices.Uncategorised.map((item) => (
-                    <option key={item} value={item}>{item}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Combined SS Tags */}
-              <div className="flex flex-wrap gap-1.5 min-h-[22px]">
-                {[
-                  ...bulkState.ssKeywords.map((k) => ({ text: k, field: 'ssKeywords' as const, color: 'blue' })),
-                  ...bulkState.geneKeywords.map((k) => ({ text: k, field: 'geneKeywords' as const, color: 'amber' })),
-                  ...bulkState.proteinKeywords.map((k) => ({ text: k, field: 'proteinKeywords' as const, color: 'purple' })),
-                  ...bulkState.uncatKeywords.map((k) => ({ text: k, field: 'uncatKeywords' as const, color: 'slate' })),
-                ].map(({ text, field, color }) => (
-                  <span
-                    key={text}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono border ${
-                      color === 'blue'
-                        ? 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-800/80'
-                        : color === 'amber'
-                        ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/80'
-                        : color === 'purple'
-                        ? 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-800/80'
-                        : 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-                    }`}
-                  >
-                    <span>{text}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveKeyword(text, field)}
-                      className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
+              {/* 4. General Descriptors / Uncategorised Box */}
+              <KeywordFieldInput
+                label="General Descriptors"
+                field="uncatKeywords"
+                badge="Uncat"
+                choices={dropdownChoices.Uncategorised}
+                selectedKeywords={bulkState.uncatKeywords}
+                onAddKeyword={handleAddKeyword}
+                onRemoveKeyword={handleRemoveKeyword}
+                termMap={termMap}
+                placeholder="Type to search descriptors (e.g. synthetic construct, mutant)..."
+                badgeBg="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                tagBg="bg-slate-100 dark:bg-slate-800"
+                tagBorder="border-slate-200 dark:border-slate-700"
+                tagText="text-slate-800 dark:text-slate-300"
+              />
             </div>
           </div>
 
