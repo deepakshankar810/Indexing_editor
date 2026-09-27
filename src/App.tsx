@@ -242,7 +242,7 @@ export default function App() {
       )}
 
       {/* Main Tab Content */}
-      <main className="flex-1 p-4 sm:p-5 lg:p-6">
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {activeTab === 'setup' && (
           <SetupTab
             termMap={termMap}

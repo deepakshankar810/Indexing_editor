@@ -88,21 +88,21 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
   }, [search, choices]);
 
   return (
-    <div className="space-y-1.5" ref={containerRef}>
+    <div className="space-y-2.5" ref={containerRef}>
       <div className="flex items-center justify-between">
         <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
           {label}
         </label>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono border ${badgeBg}`}>
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md font-mono border ${badgeBg}`}>
           {badge}
         </span>
       </div>
 
       <div className="relative">
-        <div className="flex gap-2">
+        <div className="flex gap-2.5">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-              <Search className="w-3.5 h-3.5" />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <Search className="w-4 h-4" />
             </div>
             <input
               type="text"
@@ -125,15 +125,15 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                 }
               }}
               placeholder={placeholder}
-              className="w-full pl-8 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+              className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -143,7 +143,7 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
             onChange={(e) => {
               if (e.target.value) onAddKeyword(e.target.value, field);
             }}
-            className="w-32 sm:w-36 px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0"
+            className="w-28 sm:w-32 h-10 px-3 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
           >
             <option value="">Browse...</option>
             {choices.map((item) => (
@@ -155,8 +155,8 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
         </div>
 
         {isOpen && (
-          <div className="absolute z-30 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800">
-            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+          <div className="absolute z-30 left-0 right-0 mt-2 max-h-56 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
+            <div className="px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/90 dark:bg-slate-900/90 flex items-center justify-between">
               <span>Matching {badge} Terms ({filteredSuggestions.length})</span>
               <span className="font-mono text-[9px] lowercase">press Enter or click</span>
             </div>
@@ -172,7 +172,7 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                     setSearch('');
                     setIsOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                  className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{item}</span>
@@ -180,9 +180,9 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                       <span className="text-[10px] text-slate-400 font-mono">&rarr; {entry.preferred}</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 shrink-0">
                     <span>Add</span>
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3.5 h-3.5" />
                   </div>
                 </button>
               );
@@ -196,7 +196,7 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                   setSearch('');
                   setIsOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full text-left px-3.5 py-2.5 bg-amber-50/70 hover:bg-amber-100/80 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-1.5">
                   <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -204,21 +204,21 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                     Add Custom Term: <strong className="font-mono">@{search.trim().replace(/^@+/, '')}</strong>
                   </span>
                 </div>
-                <span className="text-[10px] text-amber-600 dark:text-amber-400">Custom Tag</span>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Custom Tag</span>
               </button>
             )}
           </div>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-1.5 min-h-[20px] pt-0.5">
+      <div className="flex flex-wrap gap-1.5 min-h-[24px] pt-1">
         {selectedKeywords.length === 0 ? (
-          <span className="text-[10px] text-slate-400 italic">No {label.toLowerCase()} added.</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500 italic">No {label.toLowerCase()} added.</span>
         ) : (
           selectedKeywords.map((kw) => (
             <span
               key={kw}
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono border shadow-2xs ${tagBg} ${tagBorder} ${tagText}`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border shadow-2xs ${tagBg} ${tagBorder} ${tagText}`}
             >
               <span>{kw}</span>
               <button
@@ -227,7 +227,7 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                 className="hover:opacity-75 cursor-pointer ml-0.5"
                 title="Remove keyword"
               >
-                <X className="w-3 h-3" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </span>
           ))
@@ -254,6 +254,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   const [techSearch, setTechSearch] = useState('');
   const [isTechOpen, setIsTechOpen] = useState(false);
   const techContainerRef = useRef<HTMLDivElement>(null);
+
+  // Active category tab for Sequence Specific subfields to avoid congestion
+  const [activeSsTab, setActiveSsTab] = useState<'ss' | 'gene' | 'protein' | 'uncat' | 'all'>('ss');
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -344,6 +347,13 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   const deRemaining = 72 - deLength;
   const dePercentage = Math.min(100, Math.round((deLength / 72) * 100));
 
+  // Total Sequence Specific count
+  const totalSsCount =
+    bulkState.ssKeywords.length +
+    bulkState.geneKeywords.length +
+    bulkState.proteinKeywords.length +
+    bulkState.uncatKeywords.length;
+
   // Location preview calculations for Column 5 & 6
   const refLocPreview = useMemo(() => {
     if (bulkState.refLocType === 'Skip') return '(Unchanged)';
@@ -411,17 +421,17 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   };
 
   return (
-    <div className="max-w-[1240px] mx-auto space-y-5">
+    <div className="max-w-[1380px] mx-auto space-y-6">
       {/* Target Range Selection Toolbar */}
-      <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-xs">
+      <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xs transition-colors">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           {/* Left: Input, presets, and affected count */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3.5">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 shrink-0">
-              <div className="p-1.5 bg-blue-50 dark:bg-blue-950/60 rounded-md text-blue-600 dark:text-cyan-400">
-                <Sliders className="w-3.5 h-3.5" />
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/60 rounded-xl text-blue-600 dark:text-cyan-400 border border-blue-100 dark:border-blue-900/40 shadow-2xs">
+                <Sliders className="w-4 h-4" />
               </div>
-              <span>Target Range:</span>
+              <span className="font-semibold text-xs">Target Sequences:</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -430,10 +440,10 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                 value={bulkState.targetRange}
                 onChange={(e) => setBulkState((prev) => ({ ...prev, targetRange: e.target.value }))}
                 placeholder="all or 1-5, 10"
-                className="w-32 sm:w-36 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                className="w-36 px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
               />
 
-              {/* Preset Range Chips with whitespace-nowrap and active styling */}
+              {/* Preset Range Chips */}
               <div className="flex items-center gap-1.5 shrink-0">
                 {['all', '1-5', '6-10'].map((preset) => {
                   const isActive = bulkState.targetRange.trim().toLowerCase() === preset.toLowerCase();
@@ -442,10 +452,10 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                       key={preset}
                       type="button"
                       onClick={() => setBulkState((prev) => ({ ...prev, targetRange: preset }))}
-                      className={`px-2.5 py-1 text-[11px] font-mono rounded-md border whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                      className={`px-3 py-1.5 text-xs font-mono rounded-lg border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold dark:bg-blue-950/70 dark:text-cyan-300 dark:border-blue-700'
-                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                          ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold dark:bg-blue-950/80 dark:text-cyan-300 dark:border-blue-700 shadow-2xs'
+                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800'
                       }`}
                     >
                       {preset}
@@ -456,21 +466,21 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Scope Badge */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 shrink-0">
-              <span className={`w-1.5 h-1.5 rounded-full ${targetCount > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-850/80 border border-slate-200 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 shrink-0">
+              <span className={`w-2 h-2 rounded-full ${targetCount > 0 ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]' : 'bg-amber-500'}`} />
               <span>
-                Affects <strong className="font-mono text-slate-900 dark:text-white font-semibold">{targetCount}</strong> of{' '}
-                <span className="font-mono text-slate-700 dark:text-slate-300">{totalSequences}</span> sequences
+                Affects <strong className="font-mono text-slate-900 dark:text-white font-bold">{targetCount}</strong> of{' '}
+                <span className="font-mono text-slate-700 dark:text-slate-300">{totalSequences}</span> rows
               </span>
             </div>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
+          <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-center">
             <button
               type="button"
               onClick={onClearEditor}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/70 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-all cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Clear Form</span>
@@ -479,9 +489,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             <button
               type="button"
               onClick={onApplyEdits}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs hover:shadow-sm transition-all cursor-pointer"
             >
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-4 h-4" />
               <span>Apply to Sequences</span>
             </button>
           </div>
@@ -489,27 +499,27 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
       </div>
 
       {/* Structured Indexing Form */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Sequence Type, Location, Organisms */}
-        <div className="space-y-5">
+        <div className="space-y-6">
           {/* Card 1: Sequence & Molecule Type */}
-          <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 shadow-xs">
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-2">
+          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <Dna className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
-              <h3 className="font-medium text-slate-900 dark:text-white text-xs">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-xs tracking-tight">
                 Sequence &amp; Molecule Type
               </h3>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                   Sequence Type
                 </label>
                 <select
                   value={bulkState.sequenceType}
                   onChange={(e) => setBulkState((prev) => ({ ...prev, sequenceType: e.target.value }))}
-                  className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="w-full h-10 px-3 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/15 transition-all cursor-pointer"
                 >
                   <option value="">(No change / Unspecified)</option>
                   <option value="P1">P1 (Protein)</option>
@@ -518,14 +528,14 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                   Molecule Type
                 </label>
                 <select
                   value={bulkState.moleculeType}
                   onChange={(e) => setBulkState((prev) => ({ ...prev, moleculeType: e.target.value }))}
-                  className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+                  className="w-full h-10 px-3 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/15 transition-all cursor-pointer"
                 >
                   <option value="">(No change / Unspecified)</option>
                   <option value="protein">protein</option>
@@ -538,39 +548,39 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
           </div>
 
           {/* Card 2: Sequence Locations (Clarivate Columns 5 & 6) */}
-          <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
-              <div className="flex items-center gap-2">
+          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+              <div className="flex items-center gap-2.5">
                 <FileText className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                 <h3 className="font-semibold text-slate-900 dark:text-white text-xs tracking-tight">
                   Patent Location Reference (Cols 5 &amp; 6)
                 </h3>
               </div>
               <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                Hierarchy: Claim &gt; Example &gt; Disclosure &gt; Features
+                Claim &gt; Example &gt; Disclosure &gt; Features
               </span>
             </div>
 
             {/* Referred To Location Type (Column 5: Sequence Location Type) */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                  Referred To Location <span className="text-slate-500 font-normal">(Column 5: Location Type)</span>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Referred To Location <span className="text-slate-500 font-normal">(Col 5: Location Type)</span>
                 </label>
-                <span className="text-[10px] font-mono text-blue-600 dark:text-cyan-400 font-medium">
+                <span className="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold">
                   {refLocPreview}
                 </span>
               </div>
 
-              <div className="grid grid-cols-5 gap-1">
+              <div className="grid grid-cols-5 gap-1.5">
                 {(['Skip', 'Claim', 'Example', 'Disclosure Y', 'Features'] as const).map((mode) => (
                   <button
                     key={mode}
                     type="button"
                     onClick={() => setBulkState((prev) => ({ ...prev, refLocType: mode }))}
-                    className={`py-1.5 px-1 rounded text-xs font-medium border text-center transition-colors ${
+                    className={`py-2 px-1 rounded-xl text-xs font-medium border text-center transition-all cursor-pointer ${
                       bulkState.refLocType === mode
-                        ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-slate-800 dark:text-white dark:border-slate-600 shadow-xs'
+                        ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-slate-800 dark:text-white dark:border-slate-600 shadow-2xs font-semibold'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200 dark:hover:bg-slate-850'
                     }`}
                   >
@@ -581,9 +591,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
               {/* Dynamic Number input when Claim / Example / Features selected */}
               {(bulkState.refLocType === 'Claim' || bulkState.refLocType === 'Example' || bulkState.refLocType === 'Features') && (
-                <div className="pt-1 space-y-1">
-                  <div className="flex items-center rounded-md bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 focus-within:border-blue-500 overflow-hidden">
-                    <span className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium border-r border-slate-300 dark:border-slate-700/80 shrink-0">
+                <div className="pt-1 space-y-1.5">
+                  <div className="flex items-center rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 overflow-hidden transition-all">
+                    <span className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium border-r border-slate-300 dark:border-slate-700/80 shrink-0">
                       {bulkState.refLocType}
                     </span>
                     <input
@@ -597,16 +607,16 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           ? 'e.g. 2 or 2A'
                           : 'e.g. 1 or Table 3'
                       }
-                      className="w-full px-2.5 py-1.5 bg-transparent text-slate-900 dark:text-white text-xs font-mono focus:outline-none"
+                      className="w-full px-3.5 py-2 bg-transparent text-slate-900 dark:text-white text-xs font-mono focus:outline-none"
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-500">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
                     <span>
                       {bulkState.refLocType === 'Claim'
                         ? 'Highest Geneseq priority. Enter claim numbers.'
                         : bulkState.refLocType === 'Example'
-                        ? 'Used when sequence is disclosed in specific experimental examples.'
-                        : 'Used when cited in patent feature descriptions or tables.'}
+                        ? 'Disclosed in specific experimental examples.'
+                        : 'Cited in patent feature descriptions or tables.'}
                     </span>
                     <span className="font-mono text-slate-600 dark:text-slate-400">
                       Output: {refLocPreview}
@@ -616,24 +626,24 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               )}
 
               {bulkState.refLocType === 'Disclosure Y' && (
-                <div className="text-[10px] text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 px-2.5 py-1.5 rounded">
+                <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 px-3 py-2 rounded-xl">
                   Format for general patent specification: sets <code className="text-blue-600 dark:text-cyan-400 font-mono font-medium">Disclosure Y</code> in Column 5.
                 </div>
               )}
             </div>
 
             {/* Physical Location (Column 6: Sequence Location) */}
-            <div className="space-y-2 pt-2.5 border-t border-slate-200 dark:border-slate-800/60">
+            <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800/60">
               <div className="flex items-center justify-between">
-                <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                  Physical Location <span className="text-slate-500 font-normal">(Column 6: Sequence Location)</span>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Physical Location <span className="text-slate-500 font-normal">(Col 6: Sequence Location)</span>
                 </label>
-                <span className="text-[10px] font-mono text-blue-600 dark:text-cyan-400 font-medium">
+                <span className="text-xs font-mono text-blue-600 dark:text-cyan-400 font-semibold">
                   {physLocPreview}
                 </span>
               </div>
 
-              <div className="grid grid-cols-5 gap-1">
+              <div className="grid grid-cols-5 gap-1.5">
                 {(['Skip', 'Page', 'Figure', 'Column', 'SEQ ID NO'] as const).map((mode) => (
                   <button
                     key={mode}
@@ -643,9 +653,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                       physLocType: mode,
                       physLocVal: mode === 'SEQ ID NO' && !prev.physLocVal ? 'SeqID {x}' : prev.physLocVal,
                     }))}
-                    className={`py-1.5 px-1 rounded text-xs font-medium border text-center transition-colors ${
+                    className={`py-2 px-1 rounded-xl text-xs font-medium border text-center transition-all cursor-pointer ${
                       bulkState.physLocType === mode
-                        ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-slate-800 dark:text-white dark:border-slate-600 shadow-xs'
+                        ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-slate-800 dark:text-white dark:border-slate-600 shadow-2xs font-semibold'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200 dark:hover:bg-slate-850'
                     }`}
                   >
@@ -655,10 +665,10 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
 
               {bulkState.physLocType !== 'Skip' && (
-                <div className="pt-1 space-y-1">
-                  <div className="flex items-center rounded-md bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 focus-within:border-blue-500 overflow-hidden">
+                <div className="pt-1 space-y-1.5">
+                  <div className="flex items-center rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/15 overflow-hidden transition-all">
                     {bulkState.physLocType !== 'SEQ ID NO' && (
-                      <span className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium border-r border-slate-300 dark:border-slate-700/80 shrink-0">
+                      <span className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium border-r border-slate-300 dark:border-slate-700/80 shrink-0">
                         {bulkState.physLocType}
                       </span>
                     )}
@@ -675,14 +685,14 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           ? 'e.g. 4 or 4-5'
                           : 'SeqID {x}'
                       }
-                      className="w-full px-2.5 py-1.5 bg-transparent text-slate-900 dark:text-white text-xs font-mono focus:outline-none"
+                      className="w-full px-3.5 py-2 bg-transparent text-slate-900 dark:text-white text-xs font-mono focus:outline-none"
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-500">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
                     <span>
                       {bulkState.physLocType === 'SEQ ID NO'
-                        ? 'Use token {x} to substitute the sequence ID automatically.'
-                        : `Prefix "${bulkState.physLocType}" will be standardized automatically.`}
+                        ? 'Token {x} auto-substitutes the sequence ID.'
+                        : `Standardized prefix "${bulkState.physLocType}".`}
                     </span>
                     <span className="font-mono text-slate-600 dark:text-slate-400">
                       Output: {physLocPreview}
@@ -693,44 +703,44 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Live Verification Box */}
-            <div className="bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-[11px] space-y-1.5">
+            <div className="bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 text-xs space-y-2">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Clarivate Column Output Verification:
+                Clarivate Column Output Preview:
               </div>
-              <div className="grid grid-cols-2 gap-2 font-mono">
-                <div className="bg-white dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800/80">
-                  <span className="text-slate-400 block text-[9px] uppercase">Col 5 (Location Type)</span>
-                  <span className="text-slate-800 dark:text-slate-200 font-semibold">{refLocPreview}</span>
+              <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
+                <div className="bg-white dark:bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800/80">
+                  <span className="text-slate-400 block text-[9px] uppercase font-sans font-medium">Col 5 (Location Type)</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-semibold">{refLocPreview}</span>
                 </div>
-                <div className="bg-white dark:bg-slate-950 px-2 py-1 rounded border border-slate-200 dark:border-slate-800/80">
-                  <span className="text-slate-400 block text-[9px] uppercase">Col 6 (Sequence Location)</span>
-                  <span className="text-slate-800 dark:text-slate-200 font-semibold">{physLocPreview}</span>
+                <div className="bg-white dark:bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800/80">
+                  <span className="text-slate-400 block text-[9px] uppercase font-sans font-medium">Col 6 (Sequence Location)</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-semibold">{physLocPreview}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Card 3: Organism Details */}
-          <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2">
+          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div className="flex items-center gap-2">
                 <a
                   href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi"
                   target="_blank"
                   rel="noreferrer"
-                  className="font-medium text-blue-600 dark:text-blue-400 hover:underline text-xs inline-flex items-center gap-1.5"
+                  className="font-semibold text-blue-600 dark:text-cyan-400 hover:underline text-xs inline-flex items-center gap-1.5 tracking-tight"
                   title="Search NCBI Taxonomy Browser (opens in new tab)"
                 >
                   <span>Organism Details</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
               <span className="text-[10px] text-slate-500 font-mono">Format: Name $ Comment</span>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                   Organisms List (One organism per line)
                 </label>
                 <textarea
@@ -738,22 +748,22 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                   value={bulkState.organismListText}
                   onChange={(e) => setBulkState((prev) => ({ ...prev, organismListText: e.target.value }))}
                   placeholder={`Homo sapiens $ strain XYZ\nTeschovirus A $\nEscherichia coli $ K-12`}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500"
+                  className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
                 />
-                <div className="text-[10px] text-slate-500 mt-1">
+                <div className="text-[11px] text-slate-500">
                   Auto-formatted with delimiter: <span className="font-mono text-slate-700 dark:text-slate-400">Homo sapiens$strain XYZ;Teschovirus A$;</span>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300">
                   Organism Type Classifications
                 </label>
-                <div className="flex items-center gap-4 text-xs text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-5 text-xs text-slate-700 dark:text-slate-300">
                   {['Synthetic', 'Chimeric', 'Unidentified'].map((type) => {
                     const isChecked = bulkState.organismTypes.includes(type);
                     return (
-                      <label key={type} className="inline-flex items-center gap-1.5 cursor-pointer">
+                      <label key={type} className="inline-flex items-center gap-2 cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -770,9 +780,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                               }));
                             }
                           }}
-                          className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0"
+                          className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer"
                         />
-                        <span>{type}</span>
+                        <span className="font-medium">{type}</span>
                       </label>
                     );
                   })}
@@ -783,13 +793,13 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
         </div>
 
         {/* Right Column: Keywords, Live DE Counter, Comments */}
-        <div className="space-y-5">
+        <div className="space-y-6">
           {/* Card 4: Keywords Section */}
-          <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3.5 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2">
-              <div className="flex items-center gap-2">
+          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+              <div className="flex items-center gap-2.5">
                 <Tag className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
-                <h3 className="font-medium text-slate-900 dark:text-white text-xs">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-xs tracking-tight">
                   Thesaurus Keywords Indexing
                 </h3>
               </div>
@@ -799,10 +809,10 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Disease Keywords */}
-            <div className="space-y-2" ref={diseaseContainerRef}>
+            <div className="space-y-2.5" ref={diseaseContainerRef}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                     Disease Keywords
                   </label>
@@ -818,9 +828,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         includeDiseaseActivity: !prev.includeDiseaseActivity,
                       }))
                     }
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                       bulkState.includeDiseaseActivity
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700 shadow-xs'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700 shadow-2xs'
                         : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'
                     }`}
                     title="Click to toggle whether therapeutic activity terms (/cytostatic, /antidiabetic, etc.) are included with disease keywords"
@@ -845,14 +855,14 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           includeDiseaseActivity: e.target.checked,
                         }))
                       }
-                      className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-emerald-600 focus:ring-0 cursor-pointer"
                     />
                     <span>Include /activity</span>
                   </label>
                 </div>
               </div>
 
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
                 {bulkState.includeDiseaseActivity ? (
                   <span className="text-emerald-600 dark:text-emerald-400">
                     ✓ <strong>Activity Enabled:</strong> Diseases will automatically attach their registered activity (e.g.{' '}
@@ -868,10 +878,10 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
               {/* Searchable Disease Input Combobox */}
               <div className="relative">
-                <div className="flex gap-2">
+                <div className="flex gap-2.5">
                   <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-                      <Search className="w-3.5 h-3.5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Search className="w-4 h-4" />
                     </div>
                     <input
                       type="text"
@@ -902,15 +912,15 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         }
                       }}
                       placeholder="Type to search disease terms or enter custom..."
-                      className="w-full pl-8 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                      className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
                     />
                     {diseaseSearch && (
                       <button
                         type="button"
                         onClick={() => setDiseaseSearch('')}
-                        className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -929,7 +939,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         handleAddKeyword(toAdd, 'diseaseKeywords');
                       }
                     }}
-                    className="w-36 px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-32 sm:w-36 h-10 px-3 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
                   >
                     <option value="">Browse List...</option>
                     {dropdownChoices.Disease.map((item) => (
@@ -942,8 +952,8 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
                 {/* Suggestions Dropdown Popover */}
                 {isDiseaseOpen && (
-                  <div className="absolute z-30 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800">
-                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+                  <div className="absolute z-30 left-0 right-0 mt-2 max-h-60 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/90 dark:bg-slate-900/90 flex items-center justify-between">
                       <span>Matching Controlled Disease Terms ({filteredDiseaseSuggestions.length})</span>
                       <span className="font-mono text-[9px] lowercase">press Enter or click to add</span>
                     </div>
@@ -964,7 +974,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                             setDiseaseSearch('');
                             setIsDiseaseOpen(false);
                           }}
-                          className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                          className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
@@ -989,7 +999,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                             <span className="font-mono">Add &rarr; {willOutput}</span>
-                            <Plus className="w-3 h-3" />
+                            <Plus className="w-3.5 h-3.5" />
                           </div>
                         </button>
                       );
@@ -1004,7 +1014,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           setDiseaseSearch('');
                           setIsDiseaseOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+                        className="w-full text-left px-3.5 py-2.5 bg-amber-50/70 hover:bg-amber-100/80 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-1.5">
                           <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -1012,7 +1022,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                             Add Custom Term: <strong className="font-mono">@{diseaseSearch.trim().replace(/^@+/, '')}</strong>
                           </span>
                         </div>
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400">Custom Tag</span>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Custom Tag</span>
                       </button>
                     )}
 
@@ -1026,14 +1036,14 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
 
               {/* Disease Tags */}
-              <div className="flex flex-wrap gap-1.5 min-h-[22px] pt-0.5">
+              <div className="flex flex-wrap gap-1.5 min-h-[24px] pt-1">
                 {bulkState.diseaseKeywords.length === 0 ? (
-                  <span className="text-[11px] text-slate-400 italic">No disease keywords selected.</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 italic">No disease keywords selected.</span>
                 ) : (
                   bulkState.diseaseKeywords.map((kw) => (
                     <span
                       key={kw}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-mono shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-mono shadow-2xs"
                     >
                       <span>{kw}</span>
                       <button
@@ -1042,7 +1052,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         className="text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-200 cursor-pointer ml-0.5"
                         title="Remove keyword"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </span>
                   ))
@@ -1051,7 +1061,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Tech Focus Keywords */}
-            <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800/60" ref={techContainerRef}>
+            <div className="space-y-2.5 pt-5 border-t border-slate-100 dark:border-slate-800/80" ref={techContainerRef}>
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                   Technology Focus Keywords
@@ -1061,10 +1071,10 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
               {/* Searchable Tech Input Combobox */}
               <div className="relative">
-                <div className="flex gap-2">
+                <div className="flex gap-2.5">
                   <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
-                      <Search className="w-3.5 h-3.5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Search className="w-4 h-4" />
                     </div>
                     <input
                       type="text"
@@ -1087,15 +1097,15 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         }
                       }}
                       placeholder="Type to search tech keywords or enter custom..."
-                      className="w-full pl-8 pr-8 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                      className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
                     />
                     {techSearch && (
                       <button
                         type="button"
                         onClick={() => setTechSearch('')}
-                        className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -1105,7 +1115,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                     onChange={(e) => {
                       if (e.target.value) handleAddKeyword(e.target.value, 'techKeywords');
                     }}
-                    className="w-36 px-2 py-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-lg text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-32 sm:w-36 h-10 px-3 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
                   >
                     <option value="">Browse List...</option>
                     {dropdownChoices.Tech.map((item) => (
@@ -1118,8 +1128,8 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
                 {/* Suggestions Dropdown Popover */}
                 {isTechOpen && (
-                  <div className="absolute z-30 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800">
-                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between">
+                  <div className="absolute z-30 left-0 right-0 mt-2 max-h-52 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/90 dark:bg-slate-900/90 flex items-center justify-between">
                       <span>Matching Tech Focus Terms ({filteredTechSuggestions.length})</span>
                       <span className="font-mono text-[9px] lowercase">press Enter or click</span>
                     </div>
@@ -1133,12 +1143,12 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           setTechSearch('');
                           setIsTechOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                        className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
                       >
                         <span className="font-medium text-slate-900 dark:text-slate-100">{item}</span>
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 shrink-0">
                           <span>Add</span>
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-3.5 h-3.5" />
                         </div>
                       </button>
                     ))}
@@ -1151,7 +1161,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                           setTechSearch('');
                           setIsTechOpen(false);
                         }}
-                        className="w-full text-left px-3 py-2 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
+                        className="w-full text-left px-3.5 py-2.5 bg-amber-50/70 hover:bg-amber-100/80 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-1.5">
                           <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -1159,7 +1169,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                             Add Custom Term: <strong className="font-mono">@{techSearch.trim().replace(/^@+/, '')}</strong>
                           </span>
                         </div>
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400">Custom Tag</span>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Custom Tag</span>
                       </button>
                     )}
                   </div>
@@ -1167,14 +1177,14 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
 
               {/* Tech Tags */}
-              <div className="flex flex-wrap gap-1.5 min-h-[22px] pt-0.5">
+              <div className="flex flex-wrap gap-1.5 min-h-[24px] pt-1">
                 {bulkState.techKeywords.length === 0 ? (
-                  <span className="text-[11px] text-slate-400 italic">No tech focus keywords selected.</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 italic">No tech focus keywords selected.</span>
                 ) : (
                   bulkState.techKeywords.map((kw) => (
                     <span
                       key={kw}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-200 dark:border-cyan-800/80 text-cyan-800 dark:text-cyan-300 text-xs font-mono shadow-2xs"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-200 dark:border-cyan-800/80 text-cyan-800 dark:text-cyan-300 text-xs font-mono shadow-2xs"
                     >
                       <span>{kw}</span>
                       <button
@@ -1183,7 +1193,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         className="text-cyan-500 hover:text-cyan-700 dark:hover:text-cyan-200 cursor-pointer ml-0.5"
                         title="Remove keyword"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </span>
                   ))
@@ -1191,110 +1201,248 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
             </div>
 
-            {/* Sequence Specific Keywords (Separate Search Boxes for Each Field) */}
-            <div className="space-y-3.5 pt-3 border-t border-slate-200 dark:border-slate-800/60">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2">
-                <div className="flex items-center gap-1.5">
-                  <Dna className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+            {/* Sequence Specific Keywords (De-congested with Tabbed Navigation & Dedicated Input) */}
+            <div className="space-y-4 pt-5 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Dna className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                   <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                     Sequence Specific Fields (Col 8)
                   </label>
+                  {totalSsCount > 0 && (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800">
+                      {totalSsCount} selected
+                    </span>
+                  )}
                 </div>
-                <label className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                <label className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={bulkState.keepOriginalSS}
                     onChange={(e) => setBulkState((prev) => ({ ...prev, keepOriginalSS: e.target.checked }))}
-                    className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer"
                   />
-                  <span>Retain original with Preferred</span>
+                  <span className="font-medium">Retain original with Preferred</span>
                 </label>
               </div>
 
-              {/* 1. Sequence Specific Keywords Box */}
-              <KeywordFieldInput
-                label="Sequence Specific Keywords"
-                field="ssKeywords"
-                badge="SS"
-                choices={dropdownChoices.SS}
-                selectedKeywords={bulkState.ssKeywords}
-                onAddKeyword={handleAddKeyword}
-                onRemoveKeyword={handleRemoveKeyword}
-                termMap={termMap}
-                placeholder="Type to search SS terms (e.g. PCR, siRNA, ds)..."
-                badgeBg="bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800/80"
-                tagBg="bg-blue-50 dark:bg-blue-950/80"
-                tagBorder="border-blue-200 dark:border-blue-800/80"
-                tagText="text-blue-800 dark:text-blue-300"
-              />
+              {/* Sub-Category Segmented Tab Selector */}
+              <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl text-xs">
+                <button
+                  type="button"
+                  onClick={() => setActiveSsTab('ss')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activeSsTab === 'ss'
+                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-300 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>SS Terms</span>
+                  {bulkState.ssKeywords.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-mono font-bold">
+                      {bulkState.ssKeywords.length}
+                    </span>
+                  )}
+                </button>
 
-              {/* 2. Gene Symbols Box */}
-              <KeywordFieldInput
-                label="Gene Symbols"
-                field="geneKeywords"
-                badge="Gene"
-                choices={dropdownChoices.Gene}
-                selectedKeywords={bulkState.geneKeywords}
-                onAddKeyword={handleAddKeyword}
-                onRemoveKeyword={handleRemoveKeyword}
-                termMap={termMap}
-                placeholder="Type to search gene symbols (e.g. BRCA1, EGFR, TP53)..."
-                badgeBg="bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800/80"
-                tagBg="bg-amber-50 dark:bg-amber-950/80"
-                tagBorder="border-amber-200 dark:border-amber-800/80"
-                tagText="text-amber-800 dark:text-amber-300"
-              />
+                <button
+                  type="button"
+                  onClick={() => setActiveSsTab('gene')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activeSsTab === 'gene'
+                      ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-300 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>Gene Symbols</span>
+                  {bulkState.geneKeywords.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-mono font-bold">
+                      {bulkState.geneKeywords.length}
+                    </span>
+                  )}
+                </button>
 
-              {/* 3. Protein Targets Box */}
-              <KeywordFieldInput
-                label="Protein Targets"
-                field="proteinKeywords"
-                badge="Protein"
-                choices={dropdownChoices.Protein}
-                selectedKeywords={bulkState.proteinKeywords}
-                onAddKeyword={handleAddKeyword}
-                onRemoveKeyword={handleRemoveKeyword}
-                termMap={termMap}
-                placeholder="Type to search protein targets (e.g. insulin, CD4, TNF)..."
-                badgeBg="bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800/80"
-                tagBg="bg-purple-50 dark:bg-purple-950/80"
-                tagBorder="border-purple-200 dark:border-purple-800/80"
-                tagText="text-purple-800 dark:text-purple-300"
-              />
+                <button
+                  type="button"
+                  onClick={() => setActiveSsTab('protein')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activeSsTab === 'protein'
+                      ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-300 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>Protein Targets</span>
+                  {bulkState.proteinKeywords.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 font-mono font-bold">
+                      {bulkState.proteinKeywords.length}
+                    </span>
+                  )}
+                </button>
 
-              {/* 4. General Descriptors / Uncategorised Box */}
-              <KeywordFieldInput
-                label="General Descriptors"
-                field="uncatKeywords"
-                badge="Uncat"
-                choices={dropdownChoices.Uncategorised}
-                selectedKeywords={bulkState.uncatKeywords}
-                onAddKeyword={handleAddKeyword}
-                onRemoveKeyword={handleRemoveKeyword}
-                termMap={termMap}
-                placeholder="Type to search descriptors (e.g. synthetic construct, mutant)..."
-                badgeBg="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
-                tagBg="bg-slate-100 dark:bg-slate-800"
-                tagBorder="border-slate-200 dark:border-slate-700"
-                tagText="text-slate-800 dark:text-slate-300"
-              />
+                <button
+                  type="button"
+                  onClick={() => setActiveSsTab('uncat')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activeSsTab === 'uncat'
+                      ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>Descriptors</span>
+                  {bulkState.uncatKeywords.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono font-bold">
+                      {bulkState.uncatKeywords.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveSsTab('all')}
+                  className={`ml-auto px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+                    activeSsTab === 'all'
+                      ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                  title="View all 4 input boxes simultaneously"
+                >
+                  Show All 4
+                </button>
+              </div>
+
+              {/* Tabbed Content: Shows focused category or all */}
+              <div className="space-y-4 pt-1">
+                {(activeSsTab === 'ss' || activeSsTab === 'all') && (
+                  <KeywordFieldInput
+                    label="Sequence Specific Keywords"
+                    field="ssKeywords"
+                    badge="SS"
+                    choices={dropdownChoices.SS}
+                    selectedKeywords={bulkState.ssKeywords}
+                    onAddKeyword={handleAddKeyword}
+                    onRemoveKeyword={handleRemoveKeyword}
+                    termMap={termMap}
+                    placeholder="Type to search SS terms (e.g. PCR, siRNA, ds, ss)..."
+                    badgeBg="bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800/80"
+                    tagBg="bg-blue-50 dark:bg-blue-950/80"
+                    tagBorder="border-blue-200 dark:border-blue-800/80"
+                    tagText="text-blue-800 dark:text-blue-300"
+                  />
+                )}
+
+                {(activeSsTab === 'gene' || activeSsTab === 'all') && (
+                  <KeywordFieldInput
+                    label="Gene Symbols"
+                    field="geneKeywords"
+                    badge="Gene"
+                    choices={dropdownChoices.Gene}
+                    selectedKeywords={bulkState.geneKeywords}
+                    onAddKeyword={handleAddKeyword}
+                    onRemoveKeyword={handleRemoveKeyword}
+                    termMap={termMap}
+                    placeholder="Type to search gene symbols (e.g. BRCA1, EGFR, TP53, FASL)..."
+                    badgeBg="bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800/80"
+                    tagBg="bg-amber-50 dark:bg-amber-950/80"
+                    tagBorder="border-amber-200 dark:border-amber-800/80"
+                    tagText="text-amber-800 dark:text-amber-300"
+                  />
+                )}
+
+                {(activeSsTab === 'protein' || activeSsTab === 'all') && (
+                  <KeywordFieldInput
+                    label="Protein Targets"
+                    field="proteinKeywords"
+                    badge="Protein"
+                    choices={dropdownChoices.Protein}
+                    selectedKeywords={bulkState.proteinKeywords}
+                    onAddKeyword={handleAddKeyword}
+                    onRemoveKeyword={handleRemoveKeyword}
+                    termMap={termMap}
+                    placeholder="Type to search protein targets (e.g. insulin, CD4, TNF, interferon)..."
+                    badgeBg="bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800/80"
+                    tagBg="bg-purple-50 dark:bg-purple-950/80"
+                    tagBorder="border-purple-200 dark:border-purple-800/80"
+                    tagText="text-purple-800 dark:text-purple-300"
+                  />
+                )}
+
+                {(activeSsTab === 'uncat' || activeSsTab === 'all') && (
+                  <KeywordFieldInput
+                    label="General Descriptors"
+                    field="uncatKeywords"
+                    badge="Uncat"
+                    choices={dropdownChoices.Uncategorised}
+                    selectedKeywords={bulkState.uncatKeywords}
+                    onAddKeyword={handleAddKeyword}
+                    onRemoveKeyword={handleRemoveKeyword}
+                    termMap={termMap}
+                    placeholder="Type to search descriptors (e.g. synthetic construct, mutant, variant)..."
+                    badgeBg="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                    tagBg="bg-slate-100 dark:bg-slate-800"
+                    tagBorder="border-slate-200 dark:border-slate-700"
+                    tagText="text-slate-800 dark:text-slate-300"
+                  />
+                )}
+              </div>
+
+              {/* Combined Keywords Summary Tray (when not showing all) */}
+              {activeSsTab !== 'all' && totalSsCount > 0 && (
+                <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <span>All Active Sequence Specific Keywords ({totalSsCount})</span>
+                    <span className="text-[10px] font-mono">Combined into Col 8</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                    {[
+                      ...bulkState.ssKeywords.map((k) => ({ text: k, field: 'ssKeywords' as const, color: 'blue', label: 'SS' })),
+                      ...bulkState.geneKeywords.map((k) => ({ text: k, field: 'geneKeywords' as const, color: 'amber', label: 'Gene' })),
+                      ...bulkState.proteinKeywords.map((k) => ({ text: k, field: 'proteinKeywords' as const, color: 'purple', label: 'Protein' })),
+                      ...bulkState.uncatKeywords.map((k) => ({ text: k, field: 'uncatKeywords' as const, color: 'slate', label: 'Uncat' })),
+                    ].map(({ text, field, color, label }) => (
+                      <span
+                        key={`${field}-${text}`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border shadow-2xs ${
+                          color === 'blue'
+                            ? 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-800/80'
+                            : color === 'amber'
+                            ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/80'
+                            : color === 'purple'
+                            ? 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-800/80'
+                            : 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                        }`}
+                      >
+                        <span className="opacity-60 text-[10px] uppercase font-bold">{label}:</span>
+                        <span>{text}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveKeyword(text, field)}
+                          className="hover:opacity-75 cursor-pointer ml-0.5"
+                          title="Remove keyword"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Card 5: DE Line with Precision Character Counter */}
           <div
-            className={`border rounded-xl p-4 space-y-3 transition-colors shadow-xs ${
+            className={`border rounded-2xl p-5 sm:p-6 space-y-4 transition-colors shadow-xs ${
               isDeOverLimit
                 ? 'border-amber-500 bg-amber-50/50 dark:border-amber-600/80 dark:bg-amber-950/10'
-                : 'bg-white dark:bg-[#0e1422] border-slate-200 dark:border-slate-800'
+                : 'bg-white dark:bg-[#0e1422] border-slate-200/90 dark:border-slate-800'
             }`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-xs font-medium text-slate-900 dark:text-white">
+                <label className="block text-xs font-semibold text-slate-900 dark:text-white">
                   DE Line (Description Line)
                 </label>
-                <span className="text-[10px] text-slate-500">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   Geneseq maximum rule: 72 characters
                 </span>
               </div>
@@ -1302,7 +1450,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               {/* High-Precision Character Counter Display */}
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xs font-mono tabular-nums font-semibold ${
+                  className={`text-xs font-mono tabular-nums font-bold ${
                     isDeOverLimit
                       ? 'text-amber-600 dark:text-amber-400'
                       : deLength === 0
@@ -1313,7 +1461,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                   {deLength} / 72
                 </span>
                 {isDeOverLimit && (
-                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
                     (+{Math.abs(deRemaining)} over)
                   </span>
                 )}
@@ -1321,7 +1469,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Visual Linear Progress Gauge */}
-            <div className="w-full bg-slate-100 dark:bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="w-full bg-slate-100 dark:bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800">
               <div
                 className={`h-full transition-all duration-150 ${
                   isDeOverLimit
@@ -1339,41 +1487,41 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               value={bulkState.deBase}
               onChange={(e) => setBulkState((prev) => ({ ...prev, deBase: e.target.value }))}
               placeholder="e.g. Homo sapiens FASL gene, SEQ ID NO: {x}"
-              className={`w-full px-3 py-2 bg-white dark:bg-slate-900 border rounded-md text-slate-900 dark:text-white font-mono text-xs focus:outline-none ${
+              className={`w-full h-10 px-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:ring-2 transition-all ${
                 isDeOverLimit
-                  ? 'border-amber-500 focus:border-amber-400'
-                  : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-500'
+                  ? 'border-amber-500 focus:ring-amber-500/20'
+                  : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-500 focus:ring-blue-500/15'
               }`}
             />
 
             {/* Status Information */}
-            <div className="text-[11px]">
+            <div className="text-xs">
               {isDeOverLimit ? (
-                <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium text-[11px]">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>
                     Exceeds maximum 72-character limit by {Math.abs(deRemaining)} character{Math.abs(deRemaining) > 1 ? 's' : ''}. Clarivate will reject lines over 72 characters.
                   </span>
                 </div>
               ) : deLength > 0 ? (
                 <div className="text-slate-600 dark:text-slate-400 flex items-center justify-between text-[11px]">
-                  <span className="text-emerald-600 dark:text-emerald-400">Within 72-char limit ({deRemaining} remaining)</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Within 72-char limit ({deRemaining} remaining)</span>
                   <span className="font-mono text-slate-500">
                     Preview: {bulkState.deBase.replace(/\{x\}/gi, '1')}
                   </span>
                 </div>
               ) : (
-                <span className="text-slate-500 text-[10px]">
-                  Use token <code className="text-blue-600 dark:text-cyan-400 font-mono">{'{x}'}</code> to auto-substitute sequence number.
+                <span className="text-slate-500 text-[11px]">
+                  Use token <code className="text-blue-600 dark:text-cyan-400 font-mono font-semibold">{'{x}'}</code> to auto-substitute sequence number.
                 </span>
               )}
             </div>
           </div>
 
           {/* Card 6: Comments */}
-          <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2.5 shadow-xs">
+          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-3.5 shadow-xs">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-medium text-slate-900 dark:text-white">
+              <label className="block text-xs font-semibold text-slate-900 dark:text-white">
                 Comments (Exact Text)
               </label>
               <button
@@ -1386,7 +1534,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                       'The present sequence is SEQ ID NO: {x} (see {seqid:{x}}).',
                   }));
                 }}
-                className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
               >
                 + Insert {'{seqid:{x}}'} Tag
               </button>
@@ -1397,31 +1545,34 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               value={bulkState.commentsBase}
               onChange={(e) => setBulkState((prev) => ({ ...prev, commentsBase: e.target.value }))}
               placeholder="e.g. The present sequence is SEQ ID NO: {x} (see {seqid:{x}})..."
-              className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500"
+              className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="bg-white dark:bg-[#0e1422] border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-xs">
-        <div className="text-xs text-slate-600 dark:text-slate-400">
-          Ready to write to <strong className="text-slate-900 dark:text-white font-mono tabular-nums">{targetCount}</strong> sequences in Master Grid.
+      <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+        <div className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+          <span>
+            Ready to write to <strong className="text-slate-900 dark:text-white font-mono tabular-nums font-bold">{targetCount}</strong> sequences in Master Grid.
+          </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <button
             type="button"
             onClick={onClearEditor}
-            className="px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-transparent dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 transition-colors"
+            className="h-10 px-4 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer"
           >
             Clear Form
           </button>
           <button
             type="button"
             onClick={onApplyEdits}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium shadow-sm transition-colors"
+            className="h-10 inline-flex items-center gap-2 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold shadow-xs hover:shadow-sm transition-all cursor-pointer"
           >
-            <Check className="w-3.5 h-3.5" />
+            <Check className="w-4 h-4" />
             <span>Apply to Sequences</span>
           </button>
         </div>
