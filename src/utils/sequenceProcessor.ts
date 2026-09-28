@@ -125,14 +125,33 @@ export function applyBulkEditsToRows(
     false,
     state.includeDiseaseActivity ?? true
   );
-  const techResolved = resolveKeywords(state.techKeywords, 'Tech', termMap);
-  const combinedSS = [
-    ...state.ssKeywords,
-    ...state.geneKeywords,
-    ...state.proteinKeywords,
-    ...state.uncatKeywords,
+
+  // Technology Focus (Column 9): includes Tech Focus Keywords AND Descriptors (Uncategorised)
+  const combinedTech = [
+    ...(state.techKeywords || []),
+    ...(state.uncatKeywords || []),
   ];
-  const ssResolved = resolveKeywords(combinedSS, 'SS', termMap, state.keepOriginalSS);
+  const techResolved = resolveKeywords(
+    combinedTech,
+    'Tech',
+    termMap,
+    false,
+    false
+  );
+
+  // Sequence Specific (Column 8): includes SS Keywords, Gene Symbols, and Protein Targets (NO Descriptors)
+  const combinedSS = [
+    ...(state.ssKeywords || []),
+    ...(state.geneKeywords || []),
+    ...(state.proteinKeywords || []),
+  ];
+  const ssResolved = resolveKeywords(
+    combinedSS,
+    'SS',
+    termMap,
+    state.keepOriginalSS ?? true, // Only retains original for Gene & Protein targets
+    false
+  );
 
   const diseaseKwStr = disResolved.join(';');
   const techKwStr = techResolved.join(';');

@@ -75,6 +75,7 @@ export const SetupTab: React.FC<SetupTabProps> = ({
     let proteinCount = 0;
     let uncatCount = 0;
     let preferredMappingCount = 0;
+    let useAlsoMappingCount = 0;
     let activityMappingCount = 0;
 
     for (const entry of termMap.values()) {
@@ -85,6 +86,7 @@ export const SetupTab: React.FC<SetupTabProps> = ({
       if (entry.categories.has('Protein')) proteinCount++;
       if (entry.categories.has('Uncategorised')) uncatCount++;
       if (entry.preferred && entry.preferred.trim().length > 0) preferredMappingCount++;
+      if (entry.useAlso && entry.useAlso.length > 0) useAlsoMappingCount += entry.useAlso.length;
       if (entry.activity && entry.activity.trim().length > 0) activityMappingCount++;
     }
 
@@ -97,6 +99,7 @@ export const SetupTab: React.FC<SetupTabProps> = ({
       proteinCount,
       uncatCount,
       preferredMappingCount,
+      useAlsoMappingCount,
       activityMappingCount,
     };
   }, [termMap]);
@@ -333,9 +336,11 @@ export const SetupTab: React.FC<SetupTabProps> = ({
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800/60 pt-1.5">
-                <span>Synonyms: <strong className="font-mono text-slate-700 dark:text-slate-300">{thesaurusCounts.preferredMappingCount.toLocaleString()}</strong></span>
+                <span>Preferred Mappings: <strong className="font-mono text-blue-600 dark:text-cyan-400">{thesaurusCounts.preferredMappingCount.toLocaleString()}</strong></span>
                 <span>•</span>
-                <span>Activities (/act): <strong className="font-mono text-slate-700 dark:text-slate-300">{thesaurusCounts.activityMappingCount.toLocaleString()}</strong></span>
+                <span>USE ALSO Links: <strong className="font-mono text-amber-600 dark:text-amber-400">{thesaurusCounts.useAlsoMappingCount.toLocaleString()}</strong></span>
+                <span>•</span>
+                <span>Activities (/act): <strong className="font-mono text-emerald-600 dark:text-emerald-400">{thesaurusCounts.activityMappingCount.toLocaleString()}</strong></span>
                 <span>•</span>
                 <span>Unlisted prefix: <strong className="font-mono text-amber-600 dark:text-amber-400">@term</strong></span>
               </div>
@@ -368,25 +373,38 @@ export const SetupTab: React.FC<SetupTabProps> = ({
                           : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-800'
                       }`}
                     >
-                      {cat}
+                      {cat === 'Tech'
+                        ? 'Tech (Col 9)'
+                        : cat === 'Uncategorised'
+                        ? 'Descriptors (Col 9)'
+                        : cat === 'Disease'
+                        ? 'Disease (Col 7)'
+                        : `${cat} (Col 8)`}
                     </button>
                   ))}
                 </div>
 
                 {/* Term List Table */}
-                <div className="max-h-48 overflow-y-auto border border-slate-200 dark:border-slate-800/80 rounded bg-white dark:bg-slate-900/50 divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-[11px]">
+                <div className="max-h-52 overflow-y-auto border border-slate-200 dark:border-slate-800/80 rounded bg-white dark:bg-slate-900/50 divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-[11px]">
                   {filteredTermsList.slice(0, 100).map(([lower, entry]) => (
-                    <div key={lower} className="p-1.5 px-2 flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className="text-slate-800 dark:text-slate-200 font-sans font-medium">{entry.original}</span>
-                        {entry.activity && (
-                          <span className="text-cyan-700 dark:text-cyan-300 text-[10px] bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-200 dark:border-cyan-800/60 px-1.5 py-0.2 rounded font-sans">
-                            /{entry.activity}
-                          </span>
-                        )}
-                        {entry.preferred && (
-                          <span className="text-amber-700 dark:text-amber-400 text-[10px] font-sans">
-                            → {entry.preferred}
+                    <div key={lower} className="p-2 px-2.5 flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-900 dark:text-slate-100 font-sans font-medium">{entry.original}</span>
+                          {entry.activity && (
+                            <span className="text-emerald-700 dark:text-emerald-300 text-[10px] bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/60 px-1.5 py-0.2 rounded font-sans font-medium">
+                              /{entry.activity}
+                            </span>
+                          )}
+                          {entry.preferred && entry.preferred.toLowerCase() !== entry.original.toLowerCase() && (
+                            <span className="text-blue-700 dark:text-cyan-300 text-[10px] font-sans font-medium">
+                              → Preferred: {entry.preferred}
+                            </span>
+                          )}
+                        </div>
+                        {entry.useAlso && entry.useAlso.length > 0 && (
+                          <span className="text-amber-700 dark:text-amber-400 text-[10px] font-sans font-medium pt-0.5">
+                            + Use Also: {entry.useAlso.join(', ')}
                           </span>
                         )}
                       </div>
@@ -403,10 +421,10 @@ export const SetupTab: React.FC<SetupTabProps> = ({
                                 ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800/60'
                                 : c === 'Protein'
                                 ? 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800/60'
-                                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                             }`}
                           >
-                            {c}
+                            {c === 'Uncategorised' ? 'Descriptor (Col 9)' : c === 'Tech' ? 'Tech (Col 9)' : c}
                           </span>
                         ))}
                       </div>

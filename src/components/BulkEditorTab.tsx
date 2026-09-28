@@ -38,12 +38,12 @@ interface BulkEditorTabProps {
 
 interface KeywordFieldInputProps {
   label: string;
-  field: 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords';
+  field: 'diseaseKeywords' | 'techKeywords' | 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords';
   badge: string;
   choices: string[];
   selectedKeywords: string[];
-  onAddKeyword: (kw: string, field: 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords') => void;
-  onRemoveKeyword: (kw: string, field: 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords') => void;
+  onAddKeyword: (kw: string, field: 'diseaseKeywords' | 'techKeywords' | 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords') => void;
+  onRemoveKeyword: (kw: string, field: 'diseaseKeywords' | 'techKeywords' | 'ssKeywords' | 'geneKeywords' | 'proteinKeywords' | 'uncatKeywords') => void;
   termMap: Map<string, TermEntry>;
   placeholder: string;
   badgeBg: string;
@@ -174,10 +174,19 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                   }}
                   className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{item}</span>
-                    {entry?.preferred && entry.preferred !== item && (
-                      <span className="text-[10px] text-slate-400 font-mono">&rarr; {entry.preferred}</span>
+                  <div className="flex flex-col min-w-0 pr-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{item}</span>
+                      {entry?.preferred && entry.preferred.toLowerCase() !== item.toLowerCase() && (
+                        <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-mono font-medium">
+                          &rarr; {entry.preferred}
+                        </span>
+                      )}
+                    </div>
+                    {entry?.useAlso && entry.useAlso.length > 0 && (
+                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono truncate">
+                        + Use Also: {entry.useAlso.join(', ')}
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 shrink-0">
@@ -255,8 +264,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   const [isTechOpen, setIsTechOpen] = useState(false);
   const techContainerRef = useRef<HTMLDivElement>(null);
 
-  // Active category tab for Sequence Specific subfields to avoid congestion
-  const [activeSsTab, setActiveSsTab] = useState<'ss' | 'gene' | 'protein' | 'uncat' | 'all'>('ss');
+  // Active category tabs to maintain clean, spacious view
+  const [activeTechTab, setActiveTechTab] = useState<'tech' | 'uncat' | 'all'>('tech');
+  const [activeSsTab, setActiveSsTab] = useState<'ss' | 'gene' | 'protein' | 'all'>('ss');
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -347,11 +357,15 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   const deRemaining = 72 - deLength;
   const dePercentage = Math.min(100, Math.round((deLength / 72) * 100));
 
-  // Total Sequence Specific count
+  // Total Sequence Specific count (Col 8: SS, Gene, Protein)
   const totalSsCount =
     bulkState.ssKeywords.length +
     bulkState.geneKeywords.length +
-    bulkState.proteinKeywords.length +
+    bulkState.proteinKeywords.length;
+
+  // Total Technology Focus count (Col 9: Tech Focus & Descriptors)
+  const totalTechCount =
+    bulkState.techKeywords.length +
     bulkState.uncatKeywords.length;
 
   // Location preview calculations for Column 5 & 6
@@ -1060,148 +1074,152 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
             </div>
 
-            {/* Tech Focus Keywords */}
-            <div className="space-y-2.5 pt-5 border-t border-slate-100 dark:border-slate-800/80" ref={techContainerRef}>
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                  Technology Focus Keywords
-                </label>
-                <span className="text-[10px] text-slate-400 font-mono">Col 9</span>
-              </div>
-
-              {/* Searchable Tech Input Combobox */}
-              <div className="relative">
-                <div className="flex gap-2.5">
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                      <Search className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      value={techSearch}
-                      onChange={(e) => {
-                        setTechSearch(e.target.value);
-                        setIsTechOpen(true);
-                      }}
-                      onFocus={() => setIsTechOpen(true)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          if (techSearch.trim()) {
-                            handleAddKeyword(techSearch.trim(), 'techKeywords');
-                            setTechSearch('');
-                            setIsTechOpen(false);
-                          }
-                        } else if (e.key === 'Escape') {
-                          setIsTechOpen(false);
-                        }
-                      }}
-                      placeholder="Type to search tech keywords or enter custom..."
-                      className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
-                    />
-                    {techSearch && (
-                      <button
-                        type="button"
-                        onClick={() => setTechSearch('')}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  <select
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) handleAddKeyword(e.target.value, 'techKeywords');
-                    }}
-                    className="w-32 sm:w-36 h-10 px-3 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
-                  >
-                    <option value="">Browse List...</option>
-                    {dropdownChoices.Tech.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Suggestions Dropdown Popover */}
-                {isTechOpen && (
-                  <div className="absolute z-30 left-0 right-0 mt-2 max-h-52 overflow-y-auto bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs divide-y divide-slate-100 dark:divide-slate-800 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/90 dark:bg-slate-900/90 flex items-center justify-between">
-                      <span>Matching Tech Focus Terms ({filteredTechSuggestions.length})</span>
-                      <span className="font-mono text-[9px] lowercase">press Enter or click</span>
-                    </div>
-
-                    {filteredTechSuggestions.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => {
-                          handleAddKeyword(item, 'techKeywords');
-                          setTechSearch('');
-                          setIsTechOpen(false);
-                        }}
-                        className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
-                      >
-                        <span className="font-medium text-slate-900 dark:text-slate-100">{item}</span>
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 shrink-0">
-                          <span>Add</span>
-                          <Plus className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
-                    ))}
-
-                    {techSearch.trim() && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleAddKeyword(techSearch.trim(), 'techKeywords');
-                          setTechSearch('');
-                          setIsTechOpen(false);
-                        }}
-                        className="w-full text-left px-3.5 py-2.5 bg-amber-50/70 hover:bg-amber-100/80 dark:bg-amber-950/40 dark:hover:bg-amber-950/70 text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          <Plus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                          <span>
-                            Add Custom Term: <strong className="font-mono">@{techSearch.trim().replace(/^@+/, '')}</strong>
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Custom Tag</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Tech Tags */}
-              <div className="flex flex-wrap gap-1.5 min-h-[24px] pt-1">
-                {bulkState.techKeywords.length === 0 ? (
-                  <span className="text-xs text-slate-400 dark:text-slate-500 italic">No tech focus keywords selected.</span>
-                ) : (
-                  bulkState.techKeywords.map((kw) => (
-                    <span
-                      key={kw}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-50 dark:bg-cyan-950/80 border border-cyan-200 dark:border-cyan-800/80 text-cyan-800 dark:text-cyan-300 text-xs font-mono shadow-2xs"
-                    >
-                      <span>{kw}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveKeyword(kw, 'techKeywords')}
-                        className="text-cyan-500 hover:text-cyan-700 dark:hover:text-cyan-200 cursor-pointer ml-0.5"
-                        title="Remove keyword"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+            {/* Technology Focus & Descriptors (Col 9) */}
+            <div className="space-y-4 pt-5 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                  <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    Technology Focus &amp; Descriptors (Col 9)
+                  </label>
+                  {totalTechCount > 0 && (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 font-semibold border border-cyan-200 dark:border-cyan-800">
+                      {totalTechCount} selected
                     </span>
-                  ))
+                  )}
+                </div>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  Linked into Clarivate Column 9
+                </span>
+              </div>
+
+              {/* Sub-Category Segmented Tab Selector for Col 9 */}
+              <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl text-xs">
+                <button
+                  type="button"
+                  onClick={() => setActiveTechTab('tech')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activeTechTab === 'tech'
+                      ? 'bg-white dark:bg-slate-800 text-cyan-600 dark:text-cyan-300 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>Tech Focus Terms</span>
+                  {bulkState.techKeywords.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 font-mono font-bold">
+                      {bulkState.techKeywords.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTechTab('uncat')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    activeTechTab === 'uncat'
+                      ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <span>General Descriptors</span>
+                  {bulkState.uncatKeywords.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono font-bold">
+                      {bulkState.uncatKeywords.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTechTab('all')}
+                  className={`ml-auto px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all cursor-pointer ${
+                    activeTechTab === 'all'
+                      ? 'bg-cyan-600 text-white shadow-xs font-semibold'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  }`}
+                  title="View both Tech Focus and Descriptors inputs simultaneously"
+                >
+                  Show Both
+                </button>
+              </div>
+
+              {/* Tabbed Content for Col 9 */}
+              <div className="space-y-4 pt-1">
+                {(activeTechTab === 'tech' || activeTechTab === 'all') && (
+                  <KeywordFieldInput
+                    label="Technology Focus Keywords"
+                    field="techKeywords"
+                    badge="Tech"
+                    choices={dropdownChoices.Tech}
+                    selectedKeywords={bulkState.techKeywords}
+                    onAddKeyword={handleAddKeyword}
+                    onRemoveKeyword={handleRemoveKeyword}
+                    termMap={termMap}
+                    placeholder="Type to search tech keywords (e.g. CRISPR, antibody, cell culture)..."
+                    badgeBg="bg-cyan-100 text-cyan-800 dark:bg-cyan-950/80 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800/80"
+                    tagBg="bg-cyan-50 dark:bg-cyan-950/80"
+                    tagBorder="border-cyan-200 dark:border-cyan-800/80"
+                    tagText="text-cyan-800 dark:text-cyan-300"
+                  />
+                )}
+
+                {(activeTechTab === 'uncat' || activeTechTab === 'all') && (
+                  <KeywordFieldInput
+                    label="General Descriptors"
+                    field="uncatKeywords"
+                    badge="Descriptor"
+                    choices={dropdownChoices.Uncategorised}
+                    selectedKeywords={bulkState.uncatKeywords}
+                    onAddKeyword={handleAddKeyword}
+                    onRemoveKeyword={handleRemoveKeyword}
+                    termMap={termMap}
+                    placeholder="Type to search descriptors (e.g. synthetic construct, mutant, variant)..."
+                    badgeBg="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                    tagBg="bg-slate-100 dark:bg-slate-800"
+                    tagBorder="border-slate-200 dark:border-slate-700"
+                    tagText="text-slate-800 dark:text-slate-300"
+                  />
                 )}
               </div>
+
+              {/* Combined Tech Keywords Summary Tray (when not showing both) */}
+              {activeTechTab !== 'all' && totalTechCount > 0 && (
+                <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <span>All Active Technology Focus &amp; Descriptors ({totalTechCount})</span>
+                    <span className="text-[10px] font-mono">Combined into Col 9</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                    {[
+                      ...bulkState.techKeywords.map((k) => ({ text: k, field: 'techKeywords' as const, color: 'cyan', label: 'Tech' })),
+                      ...bulkState.uncatKeywords.map((k) => ({ text: k, field: 'uncatKeywords' as const, color: 'slate', label: 'Descriptor' })),
+                    ].map(({ text, field, color, label }) => (
+                      <span
+                        key={`${field}-${text}`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border shadow-2xs ${
+                          color === 'cyan'
+                            ? 'bg-cyan-50 text-cyan-800 border-cyan-200 dark:bg-cyan-950/80 dark:text-cyan-300 dark:border-cyan-800/80'
+                            : 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                        }`}
+                      >
+                        <span className="opacity-60 text-[10px] uppercase font-bold">{label}:</span>
+                        <span>{text}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveKeyword(text, field)}
+                          className="hover:opacity-75 cursor-pointer ml-0.5"
+                          title="Remove keyword"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Sequence Specific Keywords (De-congested with Tabbed Navigation & Dedicated Input) */}
+            {/* Sequence Specific Keywords (Col 8: SS, Gene, Protein) */}
             <div className="space-y-4 pt-5 border-t border-slate-100 dark:border-slate-800/80">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2.5">
                 <div className="flex items-center gap-2">
@@ -1215,18 +1233,28 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                     </span>
                   )}
                 </div>
-                <label className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                <label
+                  className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none"
+                  title="Retains original symbol with preferred synonym for Gene Symbols and Protein Targets only"
+                >
                   <input
                     type="checkbox"
                     checked={bulkState.keepOriginalSS}
                     onChange={(e) => setBulkState((prev) => ({ ...prev, keepOriginalSS: e.target.checked }))}
                     className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer"
                   />
-                  <span className="font-medium">Retain original with Preferred</span>
+                  <span className="font-medium">Retain original for Gene &amp; Protein</span>
                 </label>
               </div>
 
-              {/* Sub-Category Segmented Tab Selector */}
+              {/* Explanatory Rule Hint for Analysts */}
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 leading-relaxed">
+                <span>
+                  <strong>Clarivate Rule:</strong> SSKW, Descriptors, Tech Focus, and Disease always use the <em>Preferred Term</em> only. Gene Symbols and Protein Targets can retain both the preferred term and the original symbol in Column 8 when enabled.
+                </span>
+              </div>
+
+              {/* Sub-Category Segmented Tab Selector for Col 8 */}
               <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-xl text-xs">
                 <button
                   type="button"
@@ -1281,36 +1309,19 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => setActiveSsTab('uncat')}
-                  className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                    activeSsTab === 'uncat'
-                      ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xs font-semibold'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <span>Descriptors</span>
-                  {bulkState.uncatKeywords.length > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-mono font-bold">
-                      {bulkState.uncatKeywords.length}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setActiveSsTab('all')}
                   className={`ml-auto px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all cursor-pointer ${
                     activeSsTab === 'all'
                       ? 'bg-blue-600 text-white shadow-xs font-semibold'
                       : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
-                  title="View all 4 input boxes simultaneously"
+                  title="View all 3 Sequence Specific inputs simultaneously"
                 >
-                  Show All 4
+                  Show All 3
                 </button>
               </div>
 
-              {/* Tabbed Content: Shows focused category or all */}
+              {/* Tabbed Content for Col 8 */}
               <div className="space-y-4 pt-1">
                 {(activeSsTab === 'ss' || activeSsTab === 'all') && (
                   <KeywordFieldInput
@@ -1365,27 +1376,9 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                     tagText="text-purple-800 dark:text-purple-300"
                   />
                 )}
-
-                {(activeSsTab === 'uncat' || activeSsTab === 'all') && (
-                  <KeywordFieldInput
-                    label="General Descriptors"
-                    field="uncatKeywords"
-                    badge="Uncat"
-                    choices={dropdownChoices.Uncategorised}
-                    selectedKeywords={bulkState.uncatKeywords}
-                    onAddKeyword={handleAddKeyword}
-                    onRemoveKeyword={handleRemoveKeyword}
-                    termMap={termMap}
-                    placeholder="Type to search descriptors (e.g. synthetic construct, mutant, variant)..."
-                    badgeBg="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
-                    tagBg="bg-slate-100 dark:bg-slate-800"
-                    tagBorder="border-slate-200 dark:border-slate-700"
-                    tagText="text-slate-800 dark:text-slate-300"
-                  />
-                )}
               </div>
 
-              {/* Combined Keywords Summary Tray (when not showing all) */}
+              {/* Combined Keywords Summary Tray for Col 8 */}
               {activeSsTab !== 'all' && totalSsCount > 0 && (
                 <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-xl space-y-2">
                   <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -1397,7 +1390,6 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                       ...bulkState.ssKeywords.map((k) => ({ text: k, field: 'ssKeywords' as const, color: 'blue', label: 'SS' })),
                       ...bulkState.geneKeywords.map((k) => ({ text: k, field: 'geneKeywords' as const, color: 'amber', label: 'Gene' })),
                       ...bulkState.proteinKeywords.map((k) => ({ text: k, field: 'proteinKeywords' as const, color: 'purple', label: 'Protein' })),
-                      ...bulkState.uncatKeywords.map((k) => ({ text: k, field: 'uncatKeywords' as const, color: 'slate', label: 'Uncat' })),
                     ].map(({ text, field, color, label }) => (
                       <span
                         key={`${field}-${text}`}
@@ -1406,9 +1398,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                             ? 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/80 dark:text-blue-300 dark:border-blue-800/80'
                             : color === 'amber'
                             ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/80'
-                            : color === 'purple'
-                            ? 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-800/80'
-                            : 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                            : 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/80 dark:text-purple-300 dark:border-purple-800/80'
                         }`}
                       >
                         <span className="opacity-60 text-[10px] uppercase font-bold">{label}:</span>

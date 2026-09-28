@@ -147,5 +147,25 @@ export function createDefaultTermMap(): Map<string, TermEntry> {
   addTerms(INITIAL_TERM_LISTS.Protein, 'Protein');
   addTerms(INITIAL_TERM_LISTS.Uncategorised, 'Uncategorised');
 
+  // Seed sample Preferred Terms and "USE ALSO" relationships for demonstration
+  const seedMappings: Record<string, { preferred?: string; useAlso?: string[] }> = {
+    fasl: { preferred: 'FASLG', useAlso: ['CD95L', 'TNFSF6'] },
+    pdcd1: { preferred: 'PDCD1', useAlso: ['CD279'] },
+    cd274: { preferred: 'CD274', useAlso: ['PD-L1', 'B7-H1'] },
+    her2: { preferred: 'ERBB2', useAlso: ['HER2/neu'] },
+    'pd-1': { preferred: 'PD-1', useAlso: ['CD279'] },
+    'humanized antibody': { useAlso: ['monoclonal antibody'] },
+    'heavy chain variable region': { preferred: 'VH region', useAlso: ['heavy chain'] },
+    'light chain variable region': { preferred: 'VL region', useAlso: ['light chain'] },
+  };
+
+  for (const [k, mapping] of Object.entries(seedMappings)) {
+    if (map.has(k)) {
+      const entry = map.get(k)!;
+      if (mapping.preferred) entry.preferred = mapping.preferred;
+      if (mapping.useAlso) entry.useAlso = mapping.useAlso;
+    }
+  }
+
   return map;
 }

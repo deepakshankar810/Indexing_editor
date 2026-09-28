@@ -48,6 +48,7 @@ export const CLARIVATE_COLUMNS: { key: keyof SequenceRow; label: string; width?:
 export interface TermEntry {
   original: string;
   preferred: string;
+  useAlso?: string[];
   activity: string;
   categories: Set<string>; // "Disease", "Tech", "SS", "Gene", "Protein", "Uncategorised"
 }

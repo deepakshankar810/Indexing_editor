@@ -49,18 +49,34 @@ export const GeneseqRulesModal: React.FC<GeneseqRulesModalProps> = ({ isOpen, on
             </div>
           </div>
 
-          {/* Rule 2: Custom Keywords with @ prefix */}
+          {/* Rule 2: Preferred Terms & USE ALSO Relationships */}
           <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 space-y-1.5">
             <div className="flex items-center gap-2 text-blue-600 dark:text-cyan-400 font-semibold">
+              <Tag className="w-3.5 h-3.5 shrink-0" />
+              <span>Thesaurus Preferred Terms &amp; USE ALSO Mappings</span>
+            </div>
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+              When a keyword in the controlled thesaurus has a <strong>Preferred Term</strong>, it is automatically substituted with the preferred synonym. If the thesaurus entry includes a <strong>USE ALSO</strong> relationship, those associated terms are automatically included alongside the primary term.
+            </p>
+            <div className="mt-1 bg-white dark:bg-slate-950 p-2.5 rounded font-mono text-[11px] text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-800/80 space-y-1">
+              <div>• <strong>Gene &amp; Protein Targets (Col 8):</strong> Option to retain both the preferred term and original symbol.</div>
+              <div>• <strong>SSKW, Descriptors, Tech Focus, Disease:</strong> Replaced strictly with the Preferred Term only.</div>
+              <div>• <strong>Descriptors (e.g. mutant, synthetic construct):</strong> Linked to <em>Technology Focus (Col 9)</em>.</div>
+            </div>
+          </div>
+
+          {/* Rule 3: Custom Keywords with @ prefix */}
+          <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 space-y-1.5">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold">
               <Tag className="w-3.5 h-3.5 shrink-0" />
               <span>Custom Terms: Controlled Vocabulary '@' Prefix</span>
             </div>
             <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-              Any indexing keyword not present in Clarivate's official controlled vocabulary must be prepended with an <code className="text-amber-600 dark:text-amber-400 font-mono">@</code> symbol (e.g., <code className="text-amber-600 dark:text-amber-400 font-mono">@monoclonal antibody</code>, <code className="text-amber-600 dark:text-amber-400 font-mono">@variable region</code>). The editor manages this rule automatically.
+              Any indexing keyword not present in Clarivate's official controlled vocabulary (or applied outside its registered category) must be prepended with an <code className="text-amber-600 dark:text-amber-400 font-mono">@</code> symbol (e.g., <code className="text-amber-600 dark:text-amber-400 font-mono">@monoclonal antibody</code>, <code className="text-amber-600 dark:text-amber-400 font-mono">@variable region</code>). The editor manages this rule automatically.
             </p>
           </div>
 
-          {/* Rule 3: Multiple Organisms & Comments Format */}
+          {/* Rule 4: Multiple Organisms & Comments Format */}
           <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 space-y-1.5">
             <div className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-semibold">
               <FileSpreadsheet className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -74,7 +90,7 @@ export const GeneseqRulesModal: React.FC<GeneseqRulesModalProps> = ({ isOpen, on
             </div>
           </div>
 
-          {/* Rule 4: Referred to Location Hierarchy */}
+          {/* Rule 5: Referred to Location Hierarchy */}
           <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 space-y-1">
             <h4 className="font-semibold text-slate-900 dark:text-slate-200">Sequence Location Hierarchy</h4>
             <p className="text-slate-600 dark:text-slate-400 leading-relaxed">

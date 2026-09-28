@@ -117,8 +117,9 @@ def process_thesaurus(file_obj, current_map):
         df.columns = [str(c).strip().lower() for c in df.columns]
         
         term_col = next((c for c in df.columns if 'term' in c or 'keyword' in c or 'name' in c), None)
-        pref_term_col = next((c for c in df.columns if 'preferred' in c), None)
-        activity_col = next((c for c in df.columns if 'activity' in c), None)
+        pref_term_col = next((c for c in df.columns if any(p in str(c).lower() for p in ['preferred', 'pref', 'use preferred', 'prefer'])), None)
+        use_also_col = next((c for c in df.columns if any(u in str(c).lower() for u in ['use also', 'see also', 'use-also', 'also'])), None)
+        activity_col = next((c for c in df.columns if 'activity' in str(c).lower()), None)
         
         if not term_col and len(df.columns) > 0:
             term_col = df.columns[0]
@@ -130,7 +131,7 @@ def process_thesaurus(file_obj, current_map):
             elif 'tech' in sn: cat = "Tech"
             elif 'gene' in sn: cat = "Gene"
             elif 'protein' in sn: cat = "Protein"
-            elif 'uncat' in sn: cat = "Uncategorised"
+            elif 'uncat' in sn or 'descriptor' in sn: cat = "Uncategorised"
 
             for _, row in df.iterrows():
                 orig_term = str(row[term_col]).strip()
@@ -140,6 +141,13 @@ def process_thesaurus(file_obj, current_map):
                 pref_term = str(row[pref_term_col]).strip() if pref_term_col and pd.notna(row[pref_term_col]) else ""
                 if pref_term.lower() == 'nan': pref_term = ""
                 
+                # Extract USE ALSO terms
+                use_also_list = []
+                if use_also_col and pd.notna(row[use_also_col]):
+                    ua_raw = str(row[use_also_col]).strip()
+                    if ua_raw and ua_raw.lower() != 'nan':
+                        use_also_list = [p.strip() for p in re.split(r'[,;|\n]', ua_raw) if p.strip() and p.strip().lower() != 'nan']
+                
                 activity = str(row[activity_col]).strip() if activity_col and pd.notna(row[activity_col]) else ""
                 if activity.lower() == 'nan': activity = ""
                 
@@ -148,11 +156,15 @@ def process_thesaurus(file_obj, current_map):
                     term_map[orig_lower] = {
                         "original": orig_term,
                         "preferred": pref_term,
+                        "useAlso": use_also_list,
                         "activity": activity,
                         "categories": {cat}
                     }
                 else:
                     if pref_term: term_map[orig_lower]['preferred'] = pref_term
+                    if use_also_list:
+                        existing_ua = term_map[orig_lower].get('useAlso', [])
+                        term_map[orig_lower]['useAlso'] = list(dict.fromkeys(existing_ua + use_also_list))
                     if activity: term_map[orig_lower]['activity'] = activity
                     term_map[orig_lower]['categories'].add(cat)
                 
@@ -162,6 +174,7 @@ def process_thesaurus(file_obj, current_map):
                         term_map[pref_lower] = {
                             "original": pref_term,
                             "preferred": "", 
+                            "useAlso": [],
                             "activity": activity,
                             "categories": {cat}
                         }
@@ -190,15 +203,15 @@ def process_thesaurus(file_obj, current_map):
 # ==============================================================================
 # 4. RESOLVER & BULK EDIT LOGIC
 # ==============================================================================
-def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False, include_disease_activity=True):
+def resolve_keywords(kw_list, target_column, term_map, keep_original_gene_protein=True, include_disease_activity=True):
     if not kw_list: 
         return []
     
     resolved_list = []
     allowed_categories = []
     if target_column == "Disease": allowed_categories = ["Disease"]
-    elif target_column == "Tech": allowed_categories = ["Tech"]
-    elif target_column == "SS": allowed_categories = ["SS", "Gene", "Protein", "Uncategorised"]
+    elif target_column == "Tech": allowed_categories = ["Tech", "Uncategorised"]
+    elif target_column == "SS": allowed_categories = ["SS", "Gene", "Protein"]
     
     for kw in kw_list:
         kw_clean = str(kw).strip()
@@ -214,10 +227,11 @@ def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False, i
             continue
             
         data = term_map[kw_lower]
-        pref = data['preferred']
-        act = data['activity']
-        orig = data['original']
-        cats = data['categories']
+        pref = data.get('preferred', '')
+        use_also = data.get('useAlso', [])
+        act = data.get('activity', '')
+        orig = data.get('original', kw_clean)
+        cats = data.get('categories', set())
         
         has_valid_category = any(c in allowed_categories for c in cats)
         needs_at = not has_valid_category
@@ -227,6 +241,7 @@ def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False, i
             primary_term = '@' + primary_term.lstrip('@')
             orig = '@' + orig.lstrip('@')
         
+        # 1. Add primary/preferred term
         if target_column == "Disease":
             if include_disease_activity and act:
                 act_str = f" /{act.lstrip('/')}"
@@ -235,8 +250,21 @@ def resolve_keywords(kw_list, target_column, term_map, keep_original_ss=False, i
                 resolved_list.append(primary_term)
         else:
             resolved_list.append(primary_term)
-            if target_column == "SS" and pref and keep_original_ss and orig != primary_term:
+            
+        # 2. Retain original term along with preferred ONLY for Gene and Protein targets in Col 8 (SS)
+        is_gene_or_protein = 'Gene' in cats or 'Protein' in cats
+        if target_column == "SS" and is_gene_or_protein and pref and keep_original_gene_protein:
+            if orig != primary_term:
                 resolved_list.append(orig)
+                
+        # 3. USE ALSO terms: Include alongside the selected term
+        if use_also and isinstance(use_also, list):
+            for ua in use_also:
+                ua_clean = str(ua).strip()
+                if ua_clean:
+                    if needs_at or is_forced_custom:
+                        ua_clean = '@' + ua_clean.lstrip('@')
+                    resolved_list.append(ua_clean)
                 
     return list(dict.fromkeys(resolved_list))
 
@@ -315,9 +343,14 @@ def apply_bulk_edits(df, target_seqs_str, seq_type, mol_type,
     org_combined = ";".join(org_parts)
 
     dis_resolved = resolve_keywords(disease_kws, "Disease", term_map, include_disease_activity=include_disease_activity)
-    tech_resolved = resolve_keywords(tech_kws, "Tech", term_map)
-    combined_ss = (ss_kws or []) + (gene_kws or []) + (protein_kws or []) + (uncat_kws or [])
-    ss_resolved = resolve_keywords(combined_ss, "SS", term_map, keep_original_ss)
+    
+    # Technology Focus Keywords (Col 9): Tech Focus + General Descriptors
+    combined_tech = (tech_kws or []) + (uncat_kws or [])
+    tech_resolved = resolve_keywords(combined_tech, "Tech", term_map)
+    
+    # Sequence Specific Keywords (Col 8): SS + Gene + Protein
+    combined_ss = (ss_kws or []) + (gene_kws or []) + (protein_kws or [])
+    ss_resolved = resolve_keywords(combined_ss, "SS", term_map, keep_original_gene_protein=keep_original_ss)
 
     disease_kw_str = ";".join(dis_resolved)
     tech_kw_str = ";".join(tech_resolved)
