@@ -55,25 +55,46 @@ export const ColabScriptModal: React.FC<ColabScriptModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Technical Improvements Unboxed Bar */}
-        <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-700 dark:text-slate-300">
-          <div className="flex items-center gap-2">
+        <div className="px-5 py-2.5 bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs text-slate-700 dark:text-slate-300">
+          <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
-              <strong>Zero-Lag Keystrokes:</strong> Client-side JavaScript updates the 72-char counter instantly with 0ms network latency.
+              <strong>Zero-Lag 72-Char DE:</strong> Instant client-side length gauge &amp; warning alerts.
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400 shrink-0" />
             <span>
-              <strong>Matching App Theme:</strong> Custom CSS replicates the dark slate styling, Inter typography, and clean tabs.
+              <strong>Preferred &amp; USE ALSO:</strong> Automatic keyword replacement &amp; expansion.
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
             <span>
-              <strong>60,000+ Term Support:</strong> Memory-indexed dictionary parser scales without browser UI freeze.
+              <strong>Col 8 Gene/Protein:</strong> Retains original symbol with preferred term.
             </span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>
+              <strong>Col 9 Tech Focus:</strong> General Descriptors routed directly to Col 9.
+            </span>
+          </div>
+        </div>
+
+        {/* Runtime notice */}
+        <div className="px-5 py-2 bg-blue-50/80 dark:bg-blue-950/40 border-b border-blue-100 dark:border-blue-900/40 flex items-center justify-between text-[11px] text-blue-800 dark:text-blue-300">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold px-1.5 py-0.5 rounded bg-blue-200 dark:bg-blue-900/80 text-[10px] font-mono uppercase">
+              Colab Runtime: Python 3
+            </span>
+            <span>
+              Ensure notebook runtime is set to <strong>Python 3</strong> (Menu: <em>Runtime &rarr; Change runtime type &rarr; Python 3</em>).
+            </span>
+          </div>
+          <span className="text-[10px] opacity-75 hidden sm:inline">
+            Self-installing: gradio, pandas, openpyxl auto-installed on run
+          </span>
         </div>
 
         {/* Code Content */}
@@ -86,7 +107,7 @@ export const ColabScriptModal: React.FC<ColabScriptModalProps> = ({ isOpen, onCl
         {/* Footer Actions */}
         <div className="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0b101b] flex flex-wrap items-center justify-between gap-3">
           <div className="text-[11px] text-slate-600 dark:text-slate-400">
-            Paste into Colab cell and execute: <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-slate-800 dark:text-slate-200 font-mono">!pip install gradio pandas openpyxl</code>
+            Paste into a Google Colab code cell &bull; Clean Light Theme &bull; Zero external configuration needed
           </div>
           <div className="flex items-center gap-2">
             <button
