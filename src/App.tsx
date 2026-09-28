@@ -6,7 +6,7 @@ import { MasterGridTab } from './components/MasterGridTab';
 import { ColabScriptModal } from './components/ColabScriptModal';
 import { GeneseqRulesModal } from './components/GeneseqRulesModal';
 import { SequenceRow, BulkEditState, TermEntry } from './types';
-import { createDefaultTermMap } from './data/defaultThesaurus';
+import { createDefaultTermMap, ALLOWED_TECH_IN_SSKW } from './data/defaultThesaurus';
 import {
   createInitialRows,
   applyBulkEditsToRows,
@@ -97,6 +97,11 @@ export default function App() {
       if (entry.categories.has('Gene')) geneSet.add(entry.original);
       if (entry.categories.has('Protein')) proteinSet.add(entry.original);
       if (entry.categories.has('Uncategorised')) uncatSet.add(entry.original);
+    }
+
+    // Clarivate Rule: Allowed antibody/structural tech terms with '@' in SSKW
+    for (const term of ALLOWED_TECH_IN_SSKW) {
+      ssSet.add('@' + term);
     }
 
     return {

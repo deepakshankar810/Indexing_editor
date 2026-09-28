@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { TermEntry } from '../types';
+import { normalizeTechSskwTerm, ALLOWED_TECH_SSKW_SET } from '../data/defaultThesaurus';
 
 export interface ParsedThesaurusResult {
   termMap: Map<string, TermEntry>;
@@ -209,6 +210,58 @@ export function resolveKeywords(
     // Extract base word without @ and without activity /
     const kwLower = kwClean.replace(/^@+/, '').split('/')[0].trim().toLowerCase();
 
+    // SPECIAL RULE FOR COLUMN 8 (SEQUENCE SPECIFIC KEYWORDS - SSKW):
+    if (targetColumn === 'SS') {
+      // 1. Check if term matches one of the 14 allowed antibody/protein structural Tech Focus terms
+      const allowedTechTerm = normalizeTechSskwTerm(kwClean);
+      if (allowedTechTerm) {
+        // In SSKW, Clarivate requires '@' before these antibody/structural terms
+        const baseName = termMap.get(kwLower)?.original || kwClean.replace(/^@+/, '');
+        resolved.push('@' + baseName);
+
+        // Process "USE ALSO" relationships if present, but strictly respect SSKW rules
+        const data = termMap.get(kwLower);
+        if (data?.useAlso && data.useAlso.length > 0) {
+          for (const also of data.useAlso) {
+            const alsoClean = also.trim();
+            if (!alsoClean) continue;
+            const alsoAllowedTech = normalizeTechSskwTerm(alsoClean);
+            if (alsoAllowedTech) {
+              const alsoBase = alsoClean.replace(/^@+/, '');
+              resolved.push('@' + alsoBase);
+            } else {
+              const alsoLower = alsoClean.replace(/^@+/, '').split('/')[0].trim().toLowerCase();
+              if (termMap.has(alsoLower)) {
+                const alsoData = termMap.get(alsoLower)!;
+                const alsoCats = alsoData.categories;
+                const isTechOnly =
+                  Array.from(alsoCats).some((c) => c === 'Tech' || c === 'Uncategorised') &&
+                  !Array.from(alsoCats).some((c) => c === 'SS' || c === 'Gene' || c === 'Protein');
+                // Unallowed tech focus keywords are NOT considered in SSKW
+                if (!isTechOnly) {
+                  resolved.push(alsoData.preferred || alsoData.original || alsoClean);
+                }
+              }
+            }
+          }
+        }
+        continue;
+      }
+
+      // 2. Check if term is an unallowed Tech Focus keyword in termMap
+      // "in few of the techfocus keywords are being added in sskw - we should not consider that"
+      if (termMap.has(kwLower)) {
+        const cats = termMap.get(kwLower)!.categories;
+        const isTechOnly =
+          Array.from(cats).some((c) => c === 'Tech' || c === 'Uncategorised') &&
+          !Array.from(cats).some((c) => c === 'SS' || c === 'Gene' || c === 'Protein');
+        if (isTechOnly) {
+          // Drop unallowed Tech Focus keyword from SSKW
+          continue;
+        }
+      }
+    }
+
     // If term is not in termMap at all -> custom term, must have '@'
     if (!termMap.has(kwLower)) {
       let finalKw = kwClean;
@@ -271,6 +324,26 @@ export function resolveKeywords(
         if (!alsoClean) continue;
 
         const alsoLower = alsoClean.replace(/^@+/, '').split('/')[0].trim().toLowerCase();
+
+        // In SSKW, check if useAlso is an allowed Tech antibody term
+        if (targetColumn === 'SS') {
+          const alsoAllowedTech = normalizeTechSskwTerm(alsoClean);
+          if (alsoAllowedTech) {
+            resolved.push('@' + alsoClean.replace(/^@+/, ''));
+            continue;
+          }
+          if (termMap.has(alsoLower)) {
+            const alsoCats = termMap.get(alsoLower)!.categories;
+            const isTechOnly =
+              Array.from(alsoCats).some((c) => c === 'Tech' || c === 'Uncategorised') &&
+              !Array.from(alsoCats).some((c) => c === 'SS' || c === 'Gene' || c === 'Protein');
+            if (isTechOnly) {
+              // Exclude unallowed Tech Focus keyword from SSKW
+              continue;
+            }
+          }
+        }
+
         let alsoResolved = alsoClean;
 
         if (termMap.has(alsoLower)) {

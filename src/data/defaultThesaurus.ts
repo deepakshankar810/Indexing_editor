@@ -1,5 +1,56 @@
 import { TermEntry } from '../types';
 
+/**
+ * Clarivate Geneseq Rule:
+ * Specific Technology Focus antibody/structural terms allowed in Sequence Specific Keywords (Col 8).
+ * When used in SSKW, they MUST be prefixed with '@'.
+ * Other Technology Focus keywords are strictly disallowed in SSKW and must not be considered.
+ */
+export const ALLOWED_TECH_IN_SSKW = [
+  'heavy chain variable region',
+  'light chain variable region',
+  'heavy chain',
+  'light chain',
+  'heavy chain constant region',
+  'light chain constant region',
+  'chimeric protein',
+  'fusion protein',
+  'antibody',
+  'humanized antibody',
+  'single chain antibody',
+  'single domain antibody',
+  'nanobody',
+  'chimeric antibody',
+] as const;
+
+export const ALLOWED_TECH_SSKW_SET = new Set<string>(
+  ALLOWED_TECH_IN_SSKW.map((t) => t.toLowerCase())
+);
+
+/**
+ * Normalizes an antibody / structure term, matching case, hyphens, and plural forms.
+ * Returns the canonical lowercase term from ALLOWED_TECH_IN_SSKW if matched, or null otherwise.
+ */
+export function normalizeTechSskwTerm(term: string): string | null {
+  if (!term) return null;
+  const clean = term.replace(/^@+/, '').split('/')[0].trim().toLowerCase().replace(/-/g, ' ');
+  if (ALLOWED_TECH_SSKW_SET.has(clean)) return clean;
+  // Plural checks
+  if (clean.endsWith('ies')) {
+    const singular = clean.slice(0, -3) + 'y';
+    if (ALLOWED_TECH_SSKW_SET.has(singular)) return singular;
+  }
+  if (clean.endsWith('s')) {
+    const singular = clean.slice(0, -1);
+    if (ALLOWED_TECH_SSKW_SET.has(singular)) return singular;
+  }
+  return null;
+}
+
+export function isAllowedTechInSskw(term: string): boolean {
+  return normalizeTechSskwTerm(term) !== null;
+}
+
 export const INITIAL_TERM_LISTS = {
   Tech: [
     'Agriculture',
@@ -11,14 +62,20 @@ export const INITIAL_TERM_LISTS = {
     'Vaccine',
     'heavy chain variable region',
     'light chain variable region',
-    'antibody',
-    'humanized antibody',
-    'monoclonal antibody',
     'heavy chain',
     'light chain',
-    'gene fusion',
-    'fusion protein',
+    'heavy chain constant region',
+    'light chain constant region',
     'chimeric protein',
+    'fusion protein',
+    'antibody',
+    'humanized antibody',
+    'single chain antibody',
+    'single domain antibody',
+    'nanobody',
+    'chimeric antibody',
+    'monoclonal antibody',
+    'gene fusion',
     'plant',
     'coding sequence',
     'gene',
