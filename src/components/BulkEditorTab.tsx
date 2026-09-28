@@ -885,11 +885,106 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Card 4: DE Line (Description Line) */}
+          <div
+            className={`border rounded-2xl p-4 sm:p-5 space-y-3 transition-colors shadow-xs ${
+              isDeOverLimit
+                ? 'border-amber-500 bg-amber-50/40 dark:border-amber-600/80 dark:bg-amber-950/20'
+                : 'bg-white dark:bg-[#0e1422] border-slate-200/90 dark:border-slate-800'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-slate-900 dark:text-white">
+                DE Line (Description Line)
+              </label>
+
+              {/* Character Counter Display */}
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`text-xs font-mono tabular-nums font-semibold px-2 py-0.5 rounded-md ${
+                    isDeOverLimit
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 font-bold'
+                      : deLength > 60
+                      ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                  }`}
+                >
+                  {deLength} / 72
+                </span>
+                {isDeOverLimit && (
+                  <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold">
+                    (+{Math.abs(deRemaining)} over)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <input
+              type="text"
+              value={bulkState.deBase}
+              onChange={(e) => setBulkState((prev) => ({ ...prev, deBase: e.target.value }))}
+              placeholder="e.g. Homo sapiens FASL gene, SEQ ID NO: {x}"
+              className={`w-full h-10 px-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:ring-2 transition-all ${
+                isDeOverLimit
+                  ? 'border-amber-500 focus:ring-amber-500/20'
+                  : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-500 focus:ring-blue-500/15'
+              }`}
+            />
+
+            {/* Subtle Helper / Warning */}
+            {isDeOverLimit ? (
+              <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1 text-[11px] font-medium">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span>Exceeds max 72 chars. Clarivate will reject lines over 72 characters.</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Use <code className="text-blue-600 dark:text-cyan-400 font-mono font-medium">{'{x}'}</code> for sequence number</span>
+                {deLength > 0 && (
+                  <span className="font-mono text-slate-600 dark:text-slate-300">
+                    Preview: {bulkState.deBase.replace(/\{x\}/gi, '1')}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Card 5: Sequence Comments */}
+          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-slate-900 dark:text-white">
+                Comments (Exact Text)
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setBulkState((prev) => ({
+                    ...prev,
+                    commentsBase:
+                      (prev.commentsBase ? prev.commentsBase + ' ' : '') +
+                      'The present sequence is SEQ ID NO: {x} (see {seqid:{x}}).',
+                  }));
+                }}
+                className="text-xs text-blue-600 dark:text-cyan-400 hover:underline font-medium cursor-pointer"
+              >
+                + Insert {'{seqid:{x}}'} Tag
+              </button>
+            </div>
+
+            <textarea
+              rows={3}
+              value={bulkState.commentsBase}
+              onChange={(e) => setBulkState((prev) => ({ ...prev, commentsBase: e.target.value }))}
+              placeholder="e.g. The present sequence is SEQ ID NO: {x} (see {seqid:{x}})..."
+              className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
+            />
+          </div>
         </div>
 
-        {/* Right Column: Keywords, Live DE Counter, Comments */}
+        {/* Right Column: Keywords */}
         <div className="space-y-6">
-          {/* Card 4: Keywords Section */}
+          {/* Card: Keywords Section */}
           <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
               <div className="flex items-center gap-2.5">
@@ -1579,126 +1674,6 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Card 5: DE Line with Precision Character Counter */}
-          <div
-            className={`border rounded-2xl p-5 sm:p-6 space-y-4 transition-colors shadow-xs ${
-              isDeOverLimit
-                ? 'border-amber-500 bg-amber-50/50 dark:border-amber-600/80 dark:bg-amber-950/10'
-                : 'bg-white dark:bg-[#0e1422] border-slate-200/90 dark:border-slate-800'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="block text-xs font-semibold text-slate-900 dark:text-white">
-                  DE Line (Description Line)
-                </label>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Geneseq maximum rule: 72 characters
-                </span>
-              </div>
-
-              {/* High-Precision Character Counter Display */}
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-xs font-mono tabular-nums font-bold ${
-                    isDeOverLimit
-                      ? 'text-amber-600 dark:text-amber-400'
-                      : deLength === 0
-                      ? 'text-slate-400 dark:text-slate-500'
-                      : 'text-emerald-600 dark:text-emerald-400'
-                  }`}
-                >
-                  {deLength} / 72
-                </span>
-                {isDeOverLimit && (
-                  <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
-                    (+{Math.abs(deRemaining)} over)
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Visual Linear Progress Gauge */}
-            <div className="w-full bg-slate-100 dark:bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800">
-              <div
-                className={`h-full transition-all duration-150 ${
-                  isDeOverLimit
-                    ? 'bg-amber-500'
-                    : deLength > 60
-                    ? 'bg-amber-400'
-                    : 'bg-emerald-500'
-                }`}
-                style={{ width: `${dePercentage}%` }}
-              />
-            </div>
-
-            <input
-              type="text"
-              value={bulkState.deBase}
-              onChange={(e) => setBulkState((prev) => ({ ...prev, deBase: e.target.value }))}
-              placeholder="e.g. Homo sapiens FASL gene, SEQ ID NO: {x}"
-              className={`w-full h-10 px-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:ring-2 transition-all ${
-                isDeOverLimit
-                  ? 'border-amber-500 focus:ring-amber-500/20'
-                  : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-500 focus:ring-blue-500/15'
-              }`}
-            />
-
-            {/* Status Information */}
-            <div className="text-xs">
-              {isDeOverLimit ? (
-                <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium text-[11px]">
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  <span>
-                    Exceeds maximum 72-character limit by {Math.abs(deRemaining)} character{Math.abs(deRemaining) > 1 ? 's' : ''}. Clarivate will reject lines over 72 characters.
-                  </span>
-                </div>
-              ) : deLength > 0 ? (
-                <div className="text-slate-600 dark:text-slate-400 flex items-center justify-between text-[11px]">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Within 72-char limit ({deRemaining} remaining)</span>
-                  <span className="font-mono text-slate-500">
-                    Preview: {bulkState.deBase.replace(/\{x\}/gi, '1')}
-                  </span>
-                </div>
-              ) : (
-                <span className="text-slate-500 text-[11px]">
-                  Use token <code className="text-blue-600 dark:text-cyan-400 font-mono font-semibold">{'{x}'}</code> to auto-substitute sequence number.
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Card 6: Comments */}
-          <div className="bg-white dark:bg-[#0e1422] border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-3.5 shadow-xs">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-slate-900 dark:text-white">
-                Comments (Exact Text)
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setBulkState((prev) => ({
-                    ...prev,
-                    commentsBase:
-                      (prev.commentsBase ? prev.commentsBase + ' ' : '') +
-                      'The present sequence is SEQ ID NO: {x} (see {seqid:{x}}).',
-                  }));
-                }}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
-              >
-                + Insert {'{seqid:{x}}'} Tag
-              </button>
-            </div>
-
-            <textarea
-              rows={3}
-              value={bulkState.commentsBase}
-              onChange={(e) => setBulkState((prev) => ({ ...prev, commentsBase: e.target.value }))}
-              placeholder="e.g. The present sequence is SEQ ID NO: {x} (see {seqid:{x}})..."
-              className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
-            />
           </div>
         </div>
       </div>
