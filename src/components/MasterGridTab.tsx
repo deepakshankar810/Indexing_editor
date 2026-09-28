@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Download,
   Trash2,
@@ -8,8 +8,11 @@ import {
   FileSpreadsheet,
   ArrowRight,
   Filter,
+  X,
+  RefreshCw,
 } from 'lucide-react';
 import { SequenceRow, CLARIVATE_COLUMNS } from '../types';
+import { createInitialRows } from '../utils/sequenceProcessor';
 
 interface MasterGridTabProps {
   rows: SequenceRow[];
@@ -29,6 +32,7 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [showOnlyDeWarnings, setShowOnlyDeWarnings] = useState<boolean>(false);
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
 
   // Cell edit handler
   const handleCellChange = (rowIndex: number, columnKey: keyof SequenceRow, value: string) => {
@@ -119,8 +123,22 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Filter sequences..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+              className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-md text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setSearchTerm('');
+                }}
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title="Clear filter"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -140,7 +158,7 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
           {deWarningsCount > 0 && (
             <button
               onClick={() => setShowOnlyDeWarnings((prev) => !prev)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
                 showOnlyDeWarnings
                   ? 'bg-amber-100 border-amber-400 text-amber-900 dark:bg-amber-950 dark:border-amber-600 dark:text-amber-200'
                   : 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300 dark:bg-slate-900 dark:text-amber-400 dark:border-slate-800 dark:hover:border-amber-700/60'
@@ -174,22 +192,42 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
         {/* Action Controls */}
         <div className="flex items-center gap-2 shrink-0">
           <button
+            type="button"
             onClick={handleAddRow}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-medium border border-slate-200 dark:border-slate-800 transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-xs font-medium border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Row</span>
           </button>
           <button
-            onClick={onClearGrid}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-300 text-xs font-medium border border-slate-200 dark:border-slate-800 transition-colors"
+            type="button"
+            onClick={() => {
+              if (rows.length === 0) return;
+              if (isConfirmingClear) {
+                onClearGrid();
+                setIsConfirmingClear(false);
+              } else {
+                setIsConfirmingClear(true);
+                setTimeout(() => setIsConfirmingClear(false), 4000);
+              }
+            }}
+            disabled={rows.length === 0}
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
+              rows.length === 0
+                ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-900 text-slate-400 border-slate-200 dark:border-slate-800'
+                : isConfirmingClear
+                ? 'bg-rose-600 text-white border-rose-700 font-semibold shadow-xs animate-pulse'
+                : 'bg-slate-100 hover:bg-rose-50 dark:bg-slate-900 dark:hover:bg-rose-950/40 text-slate-700 hover:text-rose-600 dark:text-slate-300 dark:hover:text-rose-300 border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-900/60'
+            }`}
+            title={isConfirmingClear ? 'Click again to permanently clear all rows' : 'Clear all sequences from master grid'}
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear</span>
+            <span>{isConfirmingClear ? 'Confirm Clear?' : 'Clear'}</span>
           </button>
           <button
+            type="button"
             onClick={onExportCSV}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium shadow-sm transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
@@ -229,7 +267,38 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
 
             {/* Body Rows */}
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
-              {filteredRows.length === 0 ? (
+              {rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={CLARIVATE_COLUMNS.length + 1}
+                    className="py-16 text-center text-slate-500 font-sans"
+                  >
+                    <FileSpreadsheet className="w-10 h-10 mx-auto mb-3 text-slate-400 dark:text-slate-600" />
+                    <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm">Master Grid is currently empty</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                      All sequences have been cleared. You can initialize a new batch or add individual sequence rows.
+                    </p>
+                    <div className="flex items-center justify-center gap-2.5 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setRows(createInitialRows(10))}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-xs cursor-pointer transition-all"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Initialize 10 Sequences</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddRow}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700 cursor-pointer transition-all"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Row</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredRows.length === 0 ? (
                 <tr>
                   <td
                     colSpan={CLARIVATE_COLUMNS.length + 1}
@@ -238,8 +307,19 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
                     <FileSpreadsheet className="w-8 h-8 mx-auto mb-2 text-slate-400 dark:text-slate-700" />
                     <p className="font-medium text-slate-600 dark:text-slate-400 text-xs">No sequences match your filter</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-600 mt-0.5">
-                      Adjust your filter query or add new sequences in Setup.
+                      Adjust your filter query or reset filters.
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setFilterType('all');
+                        setShowOnlyDeWarnings(false);
+                      }}
+                      className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium cursor-pointer transition-all"
+                    >
+                      <span>Reset Filters</span>
+                    </button>
                   </td>
                 </tr>
               ) : (

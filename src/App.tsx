@@ -15,7 +15,7 @@ import {
 } from './utils/sequenceProcessor';
 import { CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 
-const INITIAL_BULK_STATE: BulkEditState = {
+const getInitialBulkState = (): BulkEditState => ({
   targetRange: 'all',
   sequenceType: '',
   moleculeType: '',
@@ -35,14 +35,14 @@ const INITIAL_BULK_STATE: BulkEditState = {
   keepOriginalSS: true,
   deBase: '',
   commentsBase: '',
-};
+});
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'setup' | 'bulk' | 'grid'>('bulk');
   const [numSequences, setNumSequences] = useState<number>(10);
   const [rows, setRows] = useState<SequenceRow[]>(() => createInitialRows(10));
   const [termMap, setTermMap] = useState<Map<string, TermEntry>>(() => createDefaultTermMap());
-  const [bulkState, setBulkState] = useState<BulkEditState>(INITIAL_BULK_STATE);
+  const [bulkState, setBulkState] = useState<BulkEditState>(getInitialBulkState());
 
   // Switchable Theme (Dark by default, toggles to Light)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -138,16 +138,14 @@ export default function App() {
 
   // Clear Bulk Editor
   const handleClearEditor = () => {
-    setBulkState(INITIAL_BULK_STATE);
+    setBulkState(getInitialBulkState());
     showToast('Bulk editor fields reset to defaults.', 'info');
   };
 
   // Clear Master Grid
   const handleClearGrid = () => {
-    if (window.confirm('Are you sure you want to clear the master grid? This will reset all rows.')) {
-      setRows([]);
-      showToast('Master grid cleared.', 'info');
-    }
+    setRows([]);
+    showToast('Master grid cleared. Click "Add Row" or "Re-initialize" to start fresh.', 'info');
   };
 
   // Export CSV
@@ -158,10 +156,7 @@ export default function App() {
     }
 
     if (invalidDECount > 0) {
-      const proceed = window.confirm(
-        `Notice: ${invalidDECount} sequence(s) have DE lines longer than 72 characters. The Clarivate tool may flag these. Do you still want to export?`
-      );
-      if (!proceed) return;
+      showToast(`Warning: ${invalidDECount} sequence(s) have DE lines > 72 characters.`, 'warn');
     }
 
     const csvContent = exportToCSV(rows);

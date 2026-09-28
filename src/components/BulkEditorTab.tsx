@@ -90,9 +90,25 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
   return (
     <div className="space-y-2.5" ref={containerRef}>
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-          {label}
-        </label>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+            {label}
+          </label>
+          {selectedKeywords.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                for (const kw of [...selectedKeywords]) {
+                  onRemoveKeyword(kw, field);
+                }
+              }}
+              className="text-[11px] text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 font-medium cursor-pointer transition-colors"
+              title={`Clear all ${label.toLowerCase()}`}
+            >
+              (Clear)
+            </button>
+          )}
+        </div>
         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md font-mono border ${badgeBg}`}>
           {badge}
         </span>
@@ -130,8 +146,17 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
             {search && (
               <button
                 type="button"
-                onClick={() => setSearch('')}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSearch('');
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearch('');
+                }}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title="Clear search"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -267,6 +292,15 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
   // Active category tabs to maintain clean, spacious view
   const [activeTechTab, setActiveTechTab] = useState<'tech' | 'uncat' | 'all'>('tech');
   const [activeSsTab, setActiveSsTab] = useState<'ss' | 'gene' | 'protein' | 'all'>('ss');
+
+  // Reset entire form and local search states
+  const handleResetForm = () => {
+    setDiseaseSearch('');
+    setTechSearch('');
+    setIsDiseaseOpen(false);
+    setIsTechOpen(false);
+    onClearEditor();
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -449,13 +483,29 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={bulkState.targetRange}
-                onChange={(e) => setBulkState((prev) => ({ ...prev, targetRange: e.target.value }))}
-                placeholder="all or 1-5, 10"
-                className="w-36 px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={bulkState.targetRange}
+                  onChange={(e) => setBulkState((prev) => ({ ...prev, targetRange: e.target.value }))}
+                  placeholder="all or 1-5, 10"
+                  className="w-36 px-3.5 py-2 pr-7 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
+                />
+                {bulkState.targetRange && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setBulkState((prev) => ({ ...prev, targetRange: '' }));
+                    }}
+                    onClick={() => setBulkState((prev) => ({ ...prev, targetRange: '' }))}
+                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    title="Clear target range"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
 
               {/* Preset Range Chips */}
               <div className="flex items-center gap-1.5 shrink-0">
@@ -493,7 +543,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
           <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-center">
             <button
               type="button"
-              onClick={onClearEditor}
+              onClick={handleResetForm}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/70 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-all cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -825,11 +875,21 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             {/* Disease Keywords */}
             <div className="space-y-2.5" ref={diseaseContainerRef}>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                    Disease Keywords
+                    Disease Keywords (Col 7)
                   </label>
+                  {bulkState.diseaseKeywords.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setBulkState((prev) => ({ ...prev, diseaseKeywords: [] }))}
+                      className="text-[11px] text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 font-medium cursor-pointer transition-colors"
+                      title="Clear all disease keywords"
+                    >
+                      (Clear)
+                    </button>
+                  )}
                 </div>
 
                 {/* Activity ON / OFF Toggle & Checkbox */}
@@ -931,8 +991,17 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                     {diseaseSearch && (
                       <button
                         type="button"
-                        onClick={() => setDiseaseSearch('')}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDiseaseSearch('');
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDiseaseSearch('');
+                        }}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        title="Clear search"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -1552,7 +1621,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <button
             type="button"
-            onClick={onClearEditor}
+            onClick={handleResetForm}
             className="h-10 px-4 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer"
           >
             Clear Form
