@@ -330,7 +330,7 @@ export const MasterGridTab: React.FC<MasterGridTabProps> = ({
                   return (
                     <tr
                       key={row.id}
-                      className={`hover:bg-blue-50/50 dark:hover:bg-slate-850/60 transition-colors ${
+                      className={`hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-colors ${
                         isDeOver
                           ? 'bg-amber-50/80 dark:bg-amber-950/20'
                           : rIdx % 2 === 0

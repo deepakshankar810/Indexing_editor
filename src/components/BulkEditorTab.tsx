@@ -142,7 +142,7 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
                 }
               }}
               placeholder={placeholder}
-              className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
+              className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
             />
             {search && (
               <button
@@ -169,11 +169,11 @@ const KeywordFieldInput: React.FC<KeywordFieldInputProps> = ({
             onChange={(e) => {
               if (e.target.value) onAddKeyword(e.target.value, field);
             }}
-            className="w-28 sm:w-32 h-10 px-3 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
+            className="w-28 sm:w-32 h-10 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
           >
-            <option value="">Browse...</option>
+            <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">Browse...</option>
             {choices.map((item) => (
-              <option key={item} value={item}>
+              <option key={item} value={item} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
                 {item}
               </option>
             ))}
@@ -550,7 +550,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                       className={`px-3 py-1.5 text-xs font-mono rounded-lg border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                         isActive
                           ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold dark:bg-blue-950/80 dark:text-cyan-300 dark:border-blue-700 shadow-2xs'
-                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       {preset}
@@ -561,7 +561,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             </div>
 
             {/* Scope Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-850/80 border border-slate-200 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 shrink-0">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
               <span className={`w-2 h-2 rounded-full ${targetCount > 0 ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]' : 'bg-amber-500'}`} />
               <span>
                 Affects <strong className="font-mono text-slate-900 dark:text-white font-bold">{targetCount}</strong> of{' '}
@@ -575,7 +575,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
             <button
               type="button"
               onClick={handleResetForm}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/70 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Clear Form</span>
@@ -614,7 +614,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                 <select
                   value={bulkState.sequenceType}
                   onChange={(e) => setBulkState((prev) => ({ ...prev, sequenceType: e.target.value }))}
-                  className="w-full h-10 px-3 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/15 transition-all cursor-pointer"
+                  className="w-full h-10 px-3 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/15 transition-all cursor-pointer"
                 >
                   <option value="">(No change / Unspecified)</option>
                   <option value="P1">P1 (Protein)</option>
@@ -630,7 +630,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                 <select
                   value={bulkState.moleculeType}
                   onChange={(e) => setBulkState((prev) => ({ ...prev, moleculeType: e.target.value }))}
-                  className="w-full h-10 px-3 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/15 transition-all cursor-pointer"
+                  className="w-full h-10 px-3 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500/15 transition-all cursor-pointer"
                 >
                   <option value="">(No change / Unspecified)</option>
                   <option value="protein">protein</option>
@@ -676,7 +676,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                     className={`py-2 px-1 rounded-xl text-xs font-medium border text-center transition-all cursor-pointer ${
                       bulkState.refLocType === mode
                         ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-slate-800 dark:text-white dark:border-slate-600 shadow-2xs font-semibold'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200 dark:hover:bg-slate-850'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
                     {mode}
@@ -751,7 +751,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                     className={`py-2 px-1 rounded-xl text-xs font-medium border text-center transition-all cursor-pointer ${
                       bulkState.physLocType === mode
                         ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-slate-800 dark:text-white dark:border-slate-600 shadow-2xs font-semibold'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200 dark:hover:bg-slate-850'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
                     {mode}
@@ -843,7 +843,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                   value={bulkState.organismListText}
                   onChange={(e) => setBulkState((prev) => ({ ...prev, organismListText: e.target.value }))}
                   placeholder={`Homo sapiens $ strain XYZ\nTeschovirus A $\nEscherichia coli $ K-12`}
-                  className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
+                  className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
                 />
                 <div className="text-[11px] text-slate-500">
                   Auto-formatted with delimiter: <span className="font-mono text-slate-700 dark:text-slate-400">Homo sapiens$strain XYZ;Teschovirus A$;</span>
@@ -925,7 +925,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               value={bulkState.deBase}
               onChange={(e) => setBulkState((prev) => ({ ...prev, deBase: e.target.value }))}
               placeholder="e.g. Homo sapiens FASL gene, SEQ ID NO: {x}"
-              className={`w-full h-10 px-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:ring-2 transition-all ${
+              className={`w-full h-10 px-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:ring-2 transition-all ${
                 isDeOverLimit
                   ? 'border-amber-500 focus:ring-amber-500/20'
                   : 'border-slate-300 dark:border-slate-700/80 focus:border-blue-500 focus:ring-blue-500/15'
@@ -977,7 +977,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
               value={bulkState.commentsBase}
               onChange={(e) => setBulkState((prev) => ({ ...prev, commentsBase: e.target.value }))}
               placeholder="e.g. The present sequence is SEQ ID NO: {x} (see {seqid:{x}})..."
-              className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
+              className="w-full p-3.5 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed transition-all"
             />
           </div>
         </div>
@@ -1112,7 +1112,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         }
                       }}
                       placeholder="Type to search disease terms or enter custom..."
-                      className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-850 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
+                      className="w-full h-10 pl-9 pr-8 bg-slate-50 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all"
                     />
                     {diseaseSearch && (
                       <button
@@ -1148,11 +1148,11 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                         handleAddKeyword(toAdd, 'diseaseKeywords');
                       }
                     }}
-                    className="w-32 sm:w-36 h-10 px-3 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-700 dark:text-slate-300 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
+                    className="w-32 sm:w-36 h-10 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 text-xs focus:outline-none focus:border-blue-500 cursor-pointer shrink-0 transition-colors"
                   >
-                    <option value="">Browse List...</option>
+                    <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">Browse List...</option>
                     {dropdownChoices.Disease.map((item) => (
-                      <option key={item} value={item}>
+                      <option key={item} value={item} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
                         {item}
                       </option>
                     ))}
@@ -1271,7 +1271,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
             {/* Technology Focus & Descriptors (Col 9) */}
             <div className="space-y-4 pt-5 border-t border-slate-100 dark:border-slate-800/80">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                   <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
@@ -1416,7 +1416,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
 
             {/* Sequence Specific Keywords (Col 8: SS, Gene, Protein) */}
             <div className="space-y-4 pt-5 border-t border-slate-100 dark:border-slate-800/80">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-850 pb-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                 <div className="flex items-center gap-2">
                   <Dna className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                   <label className="text-xs font-semibold text-slate-800 dark:text-slate-200">
@@ -1464,51 +1464,6 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
                 <span>
                   <strong>Clarivate Rule:</strong> SSKW, Descriptors, Tech Focus, and Disease always use the <em>Preferred Term</em> only. Gene Symbols and Protein Targets can retain both the preferred term and the original symbol in Column 8 when enabled.
                 </span>
-              </div>
-
-              {/* Quick-Add Allowed Antibody / Structural SSKW Terms */}
-              <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 rounded-xl space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-900 dark:text-blue-200">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
-                    <span>Allowed Tech Focus Antibody &amp; Structural Terms in SSKW (@terms):</span>
-                  </div>
-                  <span className="text-[10px] text-blue-600 dark:text-cyan-400 font-mono font-medium">
-                    Auto-adds '@' in Col 8
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                  Only these specific antibody and structural terms may be used in SSKW (with an <strong className="font-mono text-blue-600 dark:text-cyan-400">@</strong> prefix). Other Tech Focus keywords are strictly restricted to Col 9.
-                </p>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {ALLOWED_TECH_IN_SSKW.map((term) => {
-                    const atTerm = '@' + term;
-                    const isSelected = bulkState.ssKeywords.includes(atTerm) || bulkState.ssKeywords.includes(term);
-                    return (
-                      <button
-                        key={term}
-                        type="button"
-                        onClick={() => {
-                          if (isSelected) {
-                            handleRemoveKeyword(atTerm, 'ssKeywords');
-                            handleRemoveKeyword(term, 'ssKeywords');
-                          } else {
-                            handleAddKeyword(atTerm, 'ssKeywords');
-                          }
-                        }}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono border transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-2xs font-semibold'
-                            : 'bg-white hover:bg-blue-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
-                        }`}
-                        title={isSelected ? `Click to remove ${atTerm}` : `Click to add ${atTerm} to SSKW`}
-                      >
-                        <span>{atTerm}</span>
-                        {isSelected ? <Check className="w-3 h-3 ml-0.5" /> : <Plus className="w-3 h-3 ml-0.5 text-slate-400" />}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
 
               {/* Sub-Category Segmented Tab Selector for Col 8 */}
@@ -1690,7 +1645,7 @@ export const BulkEditorTab: React.FC<BulkEditorTabProps> = ({
           <button
             type="button"
             onClick={handleResetForm}
-            className="h-10 px-4 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer"
+            className="h-10 px-4 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
           >
             Clear Form
           </button>

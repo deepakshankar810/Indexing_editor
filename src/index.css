@@ -23,6 +23,15 @@
     color: #f1f5f9;
   }
 
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark select option {
+    background-color: #1e293b;
+    color: #f1f5f9;
+  }
+
   /* Tabular figures for all numeric cells & counters */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
